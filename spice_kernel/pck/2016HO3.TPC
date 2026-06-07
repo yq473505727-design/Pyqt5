@@ -1,0 +1,60 @@
+KPL/PCK
+
+Asteroid 2016HO3 PCK File
+===========================================================================
+
+ 
+Version and Date
+--------------------------------------------------------
+
+     Version 0 -- September 11, 2018 -- Jin Weitong
+ 
+ 
+ 
+Sources
+--------------------------------------------------------
+ 
+     The sources for the constants listed in this file are:
+ 
+
+        1) JPL/HORIZONS Comet and Asteroid database
+
+
+
+Orientation constants for Asteroid 2016HO3
+--------------------------------------------------------
+ 
+     The inertial reference frame for these constants is J2000; this is
+     the default reference frame for PCK orientation data.
+ 
+     The epoch of the constants is J2000; this is Julian ephemeris date
+     (JED) 2451545.0.
+ 
+     The NAIF integer code for Asteroid 2016 HO3 is 2469219 . See the
+     NAIF_IDs required reading for further information on NAIF integer
+     codes.
+ 
+
+     The W1 term was set to correspond to the period of 0.467 +/- 0.00.
+     The W0 term is arbitrarily set to 0.
+ 
+     \begindata
+ 
+        BODY2469219_POLE_RA             = ( 0.0    0.0         0.0 )
+        BODY2469219_POLE_DEC            = ( 90.0    0.0         0.0 )
+        BODY2469219_PM                  = (   0.0        18501.0706638116  0.0 )
+        BODY2469219_LONG_AXIS           = (    0.                                )
+ 
+     \begintext
+
+
+Radii for Asteroid 2016HO3
+--------------------------------------------------------
+     
+ 
+     \begindata
+ 
+        BODY2469219_RADII               = ( 0.035  0.035  0.035 )
+ 
+     \begintext
+

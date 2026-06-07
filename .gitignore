@@ -1,0 +1,20 @@
+# Python cache and runtime artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Local virtual environments and IDE metadata
+.venv/
+venv/
+.idea/
+.vs/
+
+# PyInstaller outputs
+build/
+dist/
+
+# Runtime output
+output/
+
+# GitHub's normal file size limit is 100 MB.
+spice_kernel/spk/de430.bsp

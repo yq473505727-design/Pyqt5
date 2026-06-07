@@ -1,0 +1,93 @@
+#说明:1、本文件为 模拟观测值 输入卡片格式模板
+#
+#     2、用户只需改动属性值后的参数值
+#     3、第1到10行为固定注释行,该卡片中没有空行！
+#     4、以#开头的为注释行
+#
+#2016-7-23 17:14:05  by YeMao for FARSIDE simulation
+#属性名(10列) 对应参数值
+#0000000011111111112222222222333333333344444444445555555555666666666677777777778
+#23456789+123456789+123456789+123456789+123456789+123456789+123456789+123456789+
+Simu      1                                                                      ! ==1,输出模拟值到TXT文件
+SimuLim   10.0                                                                   ! 模拟观测值间隔
+#
+#
+SimuSat   3000001                                                                !@@@ 观测卫星编号
+SimuSta   002                                                                    !@@@ 观测测站编号             #2
+SimuTim                                                                          !@@@ 观测时间
+SimuTyp   51           4.0d00             0.000d0                                     !@@@ 观测值类型，噪声水平 2W range ，4 meters
+EndCnfg                                                                          !@@@ 结束
+#
+#
+SimuSat   3000001                                                                !@@@ 观测卫星编号
+SimuSta   002                                                                    !@@@ 观测测站编号             #2
+SimuTim                                                                          !@@@ 观测时间
+SimuTyp   52           0.1d-3             0.000d0                                     !@@@ 观测值类型，噪声水平 2W range rate ，  0.1 mm/s
+EndCnfg                                                                          !@@@ 结束
+#
+#
+SimuSat   3000001                                                                !@@@ 观测卫星编号
+SimuSta   003                                                                    !@@@ 观测测站编号             #3
+SimuTim                                                                          !@@@ 观测时间
+SimuTyp   51           4.0d00             0.000d0                                     !@@@ 观测值类型，噪声水平 2W range ， 4 meters
+EndCnfg                                                                          !@@@ 结束
+#
+#
+SimuSat   3000001                                                                !@@@ 观测卫星编号
+SimuSta   003                                                                    !@@@ 观测测站编号             #3
+SimuTim                                                                          !@@@ 观测时间
+SimuTyp   52           0.1d-3             0.000d0                                     !@@@ 观测值类型，噪声水平 2W range rate ，  0.1 mm/s
+EndCnfg                                                                          !@@@ 结束
+#
+#
+SimuSat   3000001                                                                !@@@ 观测卫星编号
+SimuSta   004                                                                    !@@@ 观测测站编号             #4 004       Argio
+SimuTim                                                                          !@@@ 观测时间
+SimuTyp   51           4.0d00             0.000d0                                     !@@@ 观测值类型，噪声水平 2W range ， 4 meters
+EndCnfg                                                                          !@@@ 结束
+#
+#
+SimuSat   3000001                                                                !@@@ 观测卫星编号
+SimuSta   004                                                                    !@@@ 观测测站编号             #4
+SimuTim                                                                          !@@@ 观测时间
+SimuTyp   52           0.1d-3             0.000d0                                     !@@@ 观测值类型，噪声水平 2W range rate ，  0.1 mm/s
+EndCnfg                                                                          !@@@ 结束
+#
+#
+SimuSat   9031001                                                                !+++ 观测卫星编号
+SimuSta   005       2                                                             !+++ 观测测站编号             #1
+SimuTim                                                                          !+++ 观测时间
+SimuTyp   59           1.0d00              0.000d0                                 !+++ 观测值类型，噪声水平 VLBI DELAY  1 ns
+EndCnfg                                                                          !+++ 结束
+#
+SimuSat   9031001                                                                !+++ 观测卫星编号
+SimuSta   005       3                                                             !+++ 观测测站编号             #1
+SimuTim                                                                          !+++ 观测时间
+SimuTyp   59           1.0d00              0.000d0                                 !+++ 观测值类型，噪声水平 VLBI DELAY  1 ns
+EndCnfg                                                                          !+++ 结束
+#
+SimuSat   9031001                                                                !+++ 观测卫星编号
+SimuSta   002       3                                                             !+++ 观测测站编号             #1
+SimuTim                                                                          !+++ 观测时间
+SimuTyp   59           1.0d00              0.000d0                                 !+++ 观测值类型，噪声水平 VLBI DELAY  1 ns
+EndCnfg                                                                          !+++ 结束
+#
+SimuSat   9031001                                                                !+++ 观测卫星编号
+SimuSta   005       2                                                             !+++ 观测测站编号             #1
+SimuTim                                                                          !+++ 观测时间
+SimuTyp   60           1.0d000              0.000d0                                 !+++ 观测值类型，噪声水平 VLBI DELAY rate  1 ps/s
+EndCnfg                                                                          !+++ 结束
+#
+SimuSat   9031001                                                                !+++ 观测卫星编号
+SimuSta   005       3                                                             !+++ 观测测站编号             #1
+SimuTim                                                                          !+++ 观测时间
+SimuTyp   60           1.0d000              0.000d0                                 !+++ 观测值类型，噪声水平 VLBI DELAY rate  1 ps/s
+EndCnfg                                                                          !+++ 结束
+#
+SimuSat   9031001                                                                !+++ 观测卫星编号
+SimuSta   002       3                                                             !+++ 观测测站编号             #1
+SimuTim                                                                          !+++ 观测时间
+SimuTyp   60           1.0d000             0.000d0                                 !+++ 观测值类型，噪声水平 VLBI DELAY rate  1 ps/s
+EndCnfg                                                                          !+++ 结束
+#
+EndSimu

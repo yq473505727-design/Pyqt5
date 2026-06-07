@@ -1,0 +1,83 @@
+#说明:1、本文件为spacecraft   输入卡片格式模板
+#        使用该软件必须严格按照此卡片参数顺序进行！
+#     2、用户只需改动属性值后的参数值，禁止改动属性值的顺序！
+#     3、第1到10行为固定注释行,该卡片中没有空行！
+#
+# LP的初始轨道根数是由DE421读出来的
+#
+#属性名    参数值
+#   0         1         2         3         4         5         6         7
+#23456789+123456789+123456789+123456789+123456789+123456789+123456789+123456789+
+RefSys      1
+SatID        2469219                                                                                          ! satellite NUM.
+SatMsAr      600.0      12.00                                                                               !卫星质量，面积   Mass(kg)  Area(m2)
+SatSoCr    1.00D0              0.00D0        0  0.0 2                                                      !卫星光压系数,先验标准差standard deviation, 1解算0不解算
+SatThef    1.00D0              0.00D0        0  0.0 1
+StartTime     2026-02-19T00:00:00.000000
+EndTime       2026-05-31T00:00:00.000000
+OrbRootP0    -0.1418141892690883D+09  0.5878430701523672D+08  0.4930708830081547D+08
+OrbRootV0    -0.1427337162595734D+02 -0.2180646768341988D+02 -0.8965687572159116D+01
+OrbVARCOV1  2469219 0.1000000000000D+31      0.10000000D+31   0.1000000000000D+31
+OrbVARCOV2  2469219 0.1000000000000D+31      0.10000000D+31   0.1000000000000D+31
+OrbP0Bias  0.0 0.0 0.0
+OrbV0Bias  0.0 0.0 0.0
+OrbitFile  0                                                                                               !是否存在先验的轨道文件,如果没有0;有则为1,并写上先验轨道的路径
+DopModel   1
+DopWindow  5.0
+MoyerLT    Sun Saturn Jupiter                                                                              !计算光行时考虑的大天体的广义相对论影响
+IntegStep     600.000                                                                                        !轨道积分步长，秒
+PrintStep     600.000
+ChebOrder     11
+ChooseInt     2   1d-14   1d-18                                                                                         !1代表ode方法;2代表Adams12固定步长方法
+DopBias    0.00d0      0.00d0          0  0.0                                                               !星上的相位中心和质心的偏差的系数,第二项为先验标准差, 第三项指示是否解算,1是解算0不解算
+AstEphSnd  0.0
+AstEphErr  0  0.0
+#Lutetia    0.1081d0    0.0d0      1  0.0  2000021
+#Lutetia    9.4353d-11    0.0d0      1  0.0  2469219
+Lutetia    5.0196D-11    0.0d0      0  0.0  0
+Reject    1                                                                                                !是否根据每次迭代的结果决定剔除观测值
+DataEdit   51 3000 300
+DataEdit   52 3000 300
+DataEdit   53 3000 300
+#DataEdit   54 3000 300
+ParDeriv  0.05                                                                                             !求偏导数时候的差分量
+OrbDeriv  1d-3   1d-6                                                                                      !求初轨偏导数时候的差分量的系数:第一个是位置;第二个是速度
+OD_TyNum   51 0
+OD_TyNum   52 0
+OD_TyNum   53 3
+OD_TyNum   54 0
+OD_TyNum   59 0
+InputFilt  0                                                                                               !0代表非滤波观测值;1代表滤波未剔除坏点;2代表滤波剔除坏点
+#BeginConsd
+#EARTHPOLE   2 30.0 30.0 30.0 30.0
+#WETDELAY    2 399101 0.04 0.04
+#WETDELAY    2 399102 0.04 0.04
+#WETDELAY    2 399103 0.04 0.04
+#DRYDELAY    2 399101 0.01 0.01
+#DRYDELAY    2 399102 0.01 0.01
+#DRYDELAY    2 399103 0.01 0.01
+#UT1ERR      2 750.0 750.0
+#GSPOS       2 399101 0.1 0.1 0.1 0.1 0.1 0.1
+#GSPOS       2 399102 0.1 0.1 0.1 0.1 0.1 0.1
+#GSPOS       2 399103 0.1 0.1 0.1 0.1 0.1 0.1
+#EndConsd
+StaBaKer   d:\SPICE\kernel
+lsk:NAIF0012.TLS.pc
+spk:de430.bsp
+spk:jup329.bsp
+spk:ceres_1900_2100.bsp
+spk:pallas_1900_2100.bsp
+spk:vesta_1900_2100.bsp
+pck:gm_de431_xg.tpc
+pck:pck00010_xg.tpc
+fk:KS_BDAO_JMS.tf
+fk:EARTHFIXEDITRF93.TF
+pck:earth_070425_370426_predict.bpc
+spk:KS_BDAO_JMS.bsp
+EndBaKer                                                                                                   !结束写入基本的SPICE KERNEL的路径的标志
+StaSpeKer  d:\SPICE\kernel
+spk:2469219_20220101_20330101.bsp
+fk:2016HO3.tf
+pck:2016HO3.TPC
+EndSpeKer
+#
