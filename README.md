@@ -1,4 +1,8 @@
-# 新界面启动说明
+# Pyqt5
+
+PYQT5开发
+
+## 新界面启动说明
 
 此目录中的 `main.py` 是新 UI 的业务入口，`win.py` 仍然是由 Qt Designer / `pyuic5` 生成的界面文件。
 
