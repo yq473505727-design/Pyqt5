@@ -28,7 +28,6 @@ MoyerLT    Sun Saturn Jupiter                                                   
 IntegStep     600.000                                                                                        !轨道积分步长，秒
 PrintStep     600.000
 ChebOrder     11
-ChooseInt     2   1d-14   1d-18                                                                                         !1代表ode方法;2代表Adams12固定步长方法
 DopBias    0.00d0      0.00d0          0  0.0                                                               !星上的相位中心和质心的偏差的系数,第二项为先验标准差, 第三项指示是否解算,1是解算0不解算
 AstEphSnd  0.0
 AstEphErr  0  0.0

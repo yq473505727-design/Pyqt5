@@ -10,6 +10,7 @@
 #23456789+123456789+123456789+123456789+123456789+123456789+123456789+123456789+
 RunMode   1    0
 Integcent 10   SUN.GRAV
+ChooseInt 2   1d-14   1d-18
 ForceCent 1         2                                                              
 ForceNS   0                                                                    
 #
