@@ -24,6 +24,7 @@ class OrbitResult:
 
 
 def run_direct_orbit_determination(ui, scheme_dir: Path, output_dir: Path) -> OrbitResult:
+    """根据界面参数执行内置二体动力学轨道预报或带观测的初轨修正。"""
     output_dir.mkdir(parents=True, exist_ok=True)
 
     start_dt = ui.dateTimeEdit.dateTime()
@@ -77,6 +78,7 @@ def run_direct_orbit_determination(ui, scheme_dir: Path, output_dir: Path) -> Or
 
 
 def propagate_state(state0: np.ndarray, mu: float, times: Iterable[float]) -> np.ndarray:
+    """使用 DOP853 数值积分器把六维初始状态传播到指定时间序列。"""
     times = np.asarray(list(times), dtype=float)
     if len(times) == 0:
         return np.empty((0, 6))
@@ -97,11 +99,13 @@ def propagate_state(state0: np.ndarray, mu: float, times: Iterable[float]) -> np
 
 
 def _fit_initial_state(state0: np.ndarray, mu: float, observations):
+    """利用位置观测值对初始状态做最小二乘修正并生成残差数据。"""
     obs_times = np.array([row[0] for row in observations], dtype=float)
     obs_pos = np.array([row[1] for row in observations], dtype=float)
     scale = np.array([1.0e3, 1.0e3, 1.0e3, 1.0e-3, 1.0e-3, 1.0e-3])
 
     def residual(correction_scaled):
+        """计算给定缩放状态修正量对应的位置残差向量。"""
         trial = state0 + correction_scaled * scale
         states = propagate_state(trial, mu, obs_times)
         return ((states[:, :3] - obs_pos) / 1.0e3).ravel()
@@ -122,6 +126,7 @@ def _fit_initial_state(state0: np.ndarray, mu: float, observations):
 
 
 def _two_body_rhs(y: np.ndarray, mu: float) -> np.ndarray:
+    """计算二体问题状态方程右端，即速度和中心引力加速度。"""
     r = y[:3]
     v = y[3:]
     norm = np.linalg.norm(r)
@@ -132,6 +137,7 @@ def _two_body_rhs(y: np.ndarray, mu: float) -> np.ndarray:
 
 
 def _parse_vector(text: str, size: int, label: str) -> np.ndarray:
+    """从文本框内容解析固定长度的数值向量并校验维度。"""
     values = [_parse_float(part, None) for part in re.split(r"[\s,;]+", text.strip()) if part]
     if len(values) != size or any(v is None for v in values):
         raise ValueError(f"{label} 需要 {size} 个数值。")
@@ -139,6 +145,7 @@ def _parse_vector(text: str, size: int, label: str) -> np.ndarray:
 
 
 def _parse_float(text: str, default: Optional[float] = None) -> Optional[float]:
+    """解析普通科学计数法或 Fortran D 计数法浮点数，失败时返回默认值。"""
     try:
         return float(str(text).strip().replace("D", "E").replace("d", "e"))
     except Exception:
@@ -146,6 +153,7 @@ def _parse_float(text: str, default: Optional[float] = None) -> Optional[float]:
 
 
 def _central_mu(ui) -> float:
+    """根据当前积分中心选择界面中的中心体引力常数 GM。"""
     text = ui.Runmode_2.currentText()
     if text == "地球":
         return _parse_float(ui.lineEdit_5.text(), 3.986004415e14)
@@ -158,6 +166,7 @@ def _central_mu(ui) -> float:
 
 
 def _find_observation_file(scheme_dir: Path) -> Optional[Path]:
+    """在方案目录中查找可用于定轨拟合的位置观测文件。"""
     for name in ("observations.csv", "Observation.csv", "obs.csv"):
         path = scheme_dir / name
         if path.exists():
@@ -166,6 +175,7 @@ def _find_observation_file(scheme_dir: Path) -> Optional[Path]:
 
 
 def _read_position_observations(path: Path, start_dt) -> list:
+    """读取 observations.csv 中的秒计时或 UTC 位置观测并按时间排序。"""
     observations = []
     with path.open("r", encoding="utf-8-sig", newline="") as f:
         reader = csv.DictReader(f)
@@ -196,6 +206,7 @@ def _read_position_observations(path: Path, start_dt) -> list:
 
 
 def _qt_datetime_from_text(text: str):
+    """把常见 UTC 字符串格式转换为 QDateTime 对象。"""
     from PyQt5.QtCore import QDateTime
 
     for fmt in ("yyyy-MM-ddTHH:mm:ss.zzz", "yyyy-MM-dd HH:mm:ss.zzz", "yyyy-MM-ddTHH:mm:ss", "yyyy-MM-dd HH:mm:ss"):
@@ -206,6 +217,7 @@ def _qt_datetime_from_text(text: str):
 
 
 def _write_orbit_csv(path: Path, start_dt, times: np.ndarray, states: np.ndarray) -> None:
+    """把轨道传播结果写成包含 UTC、秒计时和六维状态的 CSV 文件。"""
     with path.open("w", encoding="utf-8", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["utc", "seconds", "x_m", "y_m", "z_m", "vx_mps", "vy_mps", "vz_mps"])
@@ -214,6 +226,7 @@ def _write_orbit_csv(path: Path, start_dt, times: np.ndarray, states: np.ndarray
 
 
 def _write_residual_csv(path: Path, rows) -> None:
+    """把观测值、计算值和残差向量写入残差 CSV 文件。"""
     with path.open("w", encoding="utf-8", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["seconds", "obs_x_m", "obs_y_m", "obs_z_m", "calc_x_m", "calc_y_m", "calc_z_m", "res_x_m", "res_y_m", "res_z_m", "norm_m"])
@@ -222,4 +235,5 @@ def _write_residual_csv(path: Path, rows) -> None:
 
 
 def _format_state(state: np.ndarray) -> str:
+    """把六维状态向量格式化为摘要报告中的科学计数法字符串。"""
     return " ".join(f"{v:.12e}" for v in state)

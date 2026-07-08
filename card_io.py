@@ -124,6 +124,7 @@ PLANET_CARD_ROWS = [
 
 #_read_text 支持自动识别编码，并兼容 utf-8、gbk、gb18030，降低中文卡片读取乱码风险
 def _read_text(path: str | Path) -> str:
+    """自动识别文本编码读取卡片文件，尽量兼容中文和旧格式文件。"""
     raw = Path(path).read_bytes()
     encodings = []
     if chardet:
@@ -140,6 +141,7 @@ def _read_text(path: str | Path) -> str:
 
 #_clean_lines 会忽略空行和以 # 开头的说明行，使控制卡片可以保留可读注释
 def _clean_lines(path: str | Path) -> List[str]:
+    """读取卡片文件并过滤空行、整行注释和行尾说明内容。"""
     lines = []
     for line in _read_text(path).splitlines():
         line = line.strip()
@@ -153,15 +155,18 @@ def _clean_lines(path: str | Path) -> List[str]:
 
 
 def _numeric_values(text: str) -> List[str]:
+    """从任意文本中提取普通或 Fortran 科学计数法形式的数值字符串。"""
     return re.findall(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[dDeE][+-]?\d+)?", text)
 
 
 def _write_lines(path: str | Path, lines: Iterable[str]) -> None:
+    """创建目标目录并把卡片行按 UTF-8 文本写入文件。"""
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     Path(path).write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def _combo_code(combo, mapping, default="0") -> str:
+    """从下拉框的 itemData 或显示文本映射得到卡片需要的数字代码。"""
     data = combo.currentData()
     if data is not None:
         return str(data)
@@ -169,6 +174,7 @@ def _combo_code(combo, mapping, default="0") -> str:
 
 
 def _step_text(ui, combo_name: str, edit_name: str, default: str = "60") -> str:
+    """从步长下拉框或备用输入框读取积分/输出步长文本。"""
     combo = getattr(ui, combo_name, None)
     if combo is not None:
         text = combo.currentText().strip()
@@ -179,6 +185,7 @@ def _step_text(ui, combo_name: str, edit_name: str, default: str = "60") -> str:
 
 
 def _normalize_step_text(value: str) -> str:
+    """规范化步长文本，支持 Fortran D 计数法并去掉无意义小数。"""
     text = str(value or "").strip()
     if not text:
         return "60"
@@ -192,6 +199,7 @@ def _normalize_step_text(value: str) -> str:
 
 
 def _set_step_text(ui, combo_name: str, edit_name: str, value: str) -> None:
+    """把卡片中的步长写回输入框和下拉框，并补齐自定义选项。"""
     normalized = _normalize_step_text(value)
     edit = getattr(ui, edit_name)
     edit.setText(normalized)
@@ -204,12 +212,14 @@ def _set_step_text(ui, combo_name: str, edit_name: str, value: str) -> None:
 
 
 def _set_combo(combo, text: str) -> None:
+    """按显示文本选择下拉框项，找不到时保持原状态。"""
     idx = combo.findText(text)
     if idx >= 0:
         combo.setCurrentIndex(idx)
 
 
 def _set_combo_by_code(combo, code: str, mapping, default_text: str | None = None) -> None:
+    """按数字代码优先选择下拉框项，必要时退回到代码映射文本。"""
     code = str(code)
     for index in range(combo.count()):
         if str(combo.itemData(index)) == code:
@@ -219,6 +229,7 @@ def _set_combo_by_code(combo, code: str, mapping, default_text: str | None = Non
 
 
 def _item_text(table: QTableWidget, row: int, col: int, default: str = "") -> str:
+    """统一读取表格普通单元格或下拉单元格的文本内容。"""
     widget = table.cellWidget(row, col)
     if isinstance(widget, QComboBox):
         text = widget.currentText().strip()
@@ -228,6 +239,7 @@ def _item_text(table: QTableWidget, row: int, col: int, default: str = "") -> st
 
 
 def _observation_type_code(value: str) -> str:
+    """把观测值类型的中文标签或数字文本转换为 SimCP/LCP 使用的代码。"""
     text = str(value or "").strip()
     for code in OBSERVATION_TYPE_INFO:
         if text == code or text.startswith(f"{code}-"):
@@ -240,17 +252,20 @@ def _observation_type_code(value: str) -> str:
 
 
 def _observation_type_label(code: str) -> str:
+    """把观测值类型代码转换为“代码-中文解释”的显示文本。"""
     code = str(code or "").strip()
     info = OBSERVATION_TYPE_INFO.get(code)
     return f"{code}-{info[0]}" if info else code
 
 
 def _observation_type_unit(code: str, default: str = "") -> str:
+    """根据观测值类型代码返回对应单位，未知代码使用默认值。"""
     info = OBSERVATION_TYPE_INFO.get(str(code or "").strip())
     return info[1] if info else default
 
 
 def _select_observation_type_code(value: str) -> str:
+    """把选择观测值表中的显示文本转换为 SelectObs 使用的类型代码。"""
     text = str(value or "").strip()
     for code in SELECT_OBSERVATION_TYPE_INFO:
         if text == code or text.startswith(f"{code}-"):
@@ -264,12 +279,14 @@ def _select_observation_type_code(value: str) -> str:
 
 
 def _select_observation_type_label(code: str) -> str:
+    """把 SelectObs 类型代码转换为“代码-中文解释”的显示文本。"""
     code = str(code or "").strip()
     label = SELECT_OBSERVATION_TYPE_INFO.get(code)
     return f"{code}-{label}" if label else code
 
 
 def _coded_value(value: str, mapping) -> str:
+    """从通用代码映射中把标签、代码或“代码-标签”文本归一为代码。"""
     text = str(value or "").strip()
     for code, label in mapping.items():
         if text == code or text.startswith(f"{code}-"):
@@ -284,17 +301,20 @@ def _coded_value(value: str, mapping) -> str:
 
 
 def _coded_label(value: str, mapping) -> str:
+    """把通用代码映射值转换为“代码-中文解释”的显示文本。"""
     code = _coded_value(value, mapping)
     label = mapping.get(code)
     return f"{code}-{label}" if label else code
 
 
 def _plain_coded_label(value: str, mapping, default: str = "") -> str:
+    """把通用代码映射值转换为纯中文标签，不带数字前缀。"""
     code = _coded_value(value, mapping)
     return mapping.get(code, default or str(value or "").strip())
 
 
 def _split_select_satellite_1(value: str) -> Tuple[str, str]:
+    """把 SelectObs 中拼接的 Passnumber 和卫星 1 编号拆回两列。"""
     text = str(value or "").strip()
     if not text:
         return "", ""
@@ -304,12 +324,14 @@ def _split_select_satellite_1(value: str) -> Tuple[str, str]:
 
 
 def _combine_select_satellite_1(pass_number: str, satellite_1: str) -> str:
+    """把 Passnumber 和卫星 1 编号合并为旧卡片要求的字段。"""
     pass_text = re.sub(r"\D", "", str(pass_number or "").strip())
     sat_text = str(satellite_1 or "").strip()
     return f"{pass_text}{sat_text}" if pass_text else sat_text
 
 
 def _fixed_width_digits(value: str, width: int, default: str) -> str:
+    """提取数字并按固定宽度补零，用于生成旧式复合编号。"""
     text = str(value or "").strip()
     digits = re.sub(r"\D", "", text)
     if not digits:
@@ -318,6 +340,7 @@ def _fixed_width_digits(value: str, width: int, default: str) -> str:
 
 
 def _obs_bias_identifier(obs_type: str, downlink: str, uplink: str) -> str:
+    """根据观测类型和上下行位生成 ObsBias 复合标识符。"""
     code = _fixed_width_digits(_observation_type_code(obs_type), 3, "051")
     down = _fixed_width_digits(downlink, 3, "001")
     up = _fixed_width_digits(uplink, 3, "001")
@@ -325,6 +348,7 @@ def _obs_bias_identifier(obs_type: str, downlink: str, uplink: str) -> str:
 
 
 def _parse_obs_bias_row(values: List[str]) -> Tuple[List[str], List[str]]:
+    """解析新旧两种 ObsBias 行格式，拆出表格列值和起止时间。"""
     if not values:
         return ["", "", "", "", "", "", ""], []
 
@@ -361,6 +385,7 @@ def _parse_obs_bias_row(values: List[str]) -> Tuple[List[str], List[str]]:
 
 
 def _set_item(table: QTableWidget, row: int, col: int, value: str) -> None:
+    """确保表格行列存在并写入左对齐的普通文本单元格。"""
     while table.rowCount() <= row:
         table.insertRow(table.rowCount())
     while table.columnCount() <= col:
@@ -371,11 +396,13 @@ def _set_item(table: QTableWidget, row: int, col: int, value: str) -> None:
 
 
 def _clear_table_rows(*tables: QTableWidget) -> None:
+    """清空一个或多个表格的所有数据行。"""
     for table in tables:
         table.setRowCount(0)
 
 
 def parse_datetime(value: str) -> QDateTime:
+    """解析卡片时间字符串，支持紧凑格式、ISO 格式和 Fortran D 后缀。"""
     value = value.strip()
     if not value:
         return QDateTime.currentDateTime()
@@ -397,6 +424,7 @@ def parse_datetime(value: str) -> QDateTime:
 
 
 def _is_valid_datetime_text(value: str) -> bool:
+    """判断文本是否能按本软件支持的任一卡片时间格式解析。"""
     if not value:
         return False
     normalized = re.sub(r"[dD][+-]?\d+$", "", value.strip())
@@ -413,6 +441,7 @@ def _is_valid_datetime_text(value: str) -> bool:
 
 
 def _compact_legacy_time(date_part: str, time_part: str = "") -> str:
+    """把旧式日期和时间片段压缩为 yyyyMMddHHmmss.zzz 格式。"""
     date_digits = re.sub(r"\D", "", date_part)
     if len(date_digits) != 8:
         return ""
@@ -428,6 +457,7 @@ def _compact_legacy_time(date_part: str, time_part: str = "") -> str:
 
 
 def _legacy_time_from_chunk(date_part: str, chunk: str) -> str:
+    """从旧卡片日期后的松散时间片段中重建紧凑时间字符串。"""
     date_digits = re.sub(r"\D", "", date_part)
     if len(date_digits) != 8:
         return ""
@@ -459,6 +489,7 @@ def _legacy_time_from_chunk(date_part: str, chunk: str) -> str:
 
 
 def _extract_legacy_datetimes(values: List[str], start_index: int) -> List[str]:
+    """从旧格式字段尾部扫描并提取最多两个起止时间。"""
     datetimes: List[str] = []
     tail = " ".join(values[start_index:])
     date_pattern = re.compile(r"(?:19|20)\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])")
@@ -474,6 +505,7 @@ def _extract_legacy_datetimes(values: List[str], start_index: int) -> List[str]:
 
 
 def _row_datetimes(values: List[str], start_index: int) -> List[str]:
+    """优先读取标准时间字段，失败时退回旧格式时间扫描。"""
     datetimes: List[str] = []
     for value in values[start_index:]:
         if _is_valid_datetime_text(value):
@@ -484,6 +516,7 @@ def _row_datetimes(values: List[str], start_index: int) -> List[str]:
 
 
 def set_datetime_cell(table: QTableWidget, row: int, col: int, value: Optional[str] = None) -> None:
+    """在表格指定位置放入带日历弹窗的 QDateTimeEdit 时间控件。"""
     editor = QDateTimeEdit()
     editor.setCalendarPopup(True)
     editor.setDisplayFormat("yyyy-MM-dd HH:mm:ss.zzz")
@@ -492,6 +525,7 @@ def set_datetime_cell(table: QTableWidget, row: int, col: int, value: Optional[s
 
 
 def datetime_cell(table: QTableWidget, row: int, col: int, fmt: str) -> str:
+    """按指定格式读取表格时间控件或文本单元格中的时间。"""
     widget = table.cellWidget(row, col)
     if isinstance(widget, QDateTimeEdit):
         return widget.dateTime().toString(fmt)
@@ -500,12 +534,14 @@ def datetime_cell(table: QTableWidget, row: int, col: int, fmt: str) -> str:
 
 
 def orbit_prior_values(values: List[str]) -> str:
+    """从 OrbVARCOV 行中提取轨道先验误差的三个主要数值。"""
     if len(values) >= 4:
         return " ".join(values[1:4])
     return " ".join(values)
 
 
 def _comment_header(kind: str) -> List[str]:
+    """生成所有控制卡片通用的中文说明头。"""
     return [
         f"# 说明：本文件由轨道确定与预报分系统软件V1.0生成，类型：{kind}",
         "# 以 # 开头的行为注释行，程序读取时会忽略。",
@@ -516,6 +552,7 @@ def _comment_header(kind: str) -> List[str]:
 
 
 def _checked_flag(ui, checkbox_name: str | None, default: str = "0") -> str:
+    """把复选框状态转换为卡片中的 0/1 标志位。"""
     if not checkbox_name:
         return default
     checkbox = getattr(ui, checkbox_name, None)
@@ -523,24 +560,29 @@ def _checked_flag(ui, checkbox_name: str | None, default: str = "0") -> str:
 
 
 def _force_nb_mask(ui) -> str:
+    """按行星顺序拼接多体引力复选框状态掩码。"""
     return "".join(_checked_flag(ui, checkbox_name) for _, checkbox_name, _, _ in PLANET_CARD_ROWS)
 
 
 def _compact_card_datetime(table: QTableWidget, row: int, col: int) -> str:
+    """读取表格时间并转换为卡片使用的紧凑时间格式。"""
     return datetime_cell(table, row, col, "yyyyMMddHHmmss.zzz")
 
 
 def _datetime_edit_card_text(editor: QDateTimeEdit) -> str:
+    """把独立时间编辑框转换为卡片使用的紧凑时间加 D0 后缀。"""
     return editor.dateTime().toString("yyyyMMddHHmmss.zzz") + "D0"
 
 
 def _simcp_station_fields(table: QTableWidget, row: int) -> str:
+    """组合 SimCP 单行中的下行位、上行位和备用测站字段。"""
     values = [_item_text(table, row, col) for col in (2, 3, 4)]
     values = [value for value in values if value]
     return "   ".join(values) if values else "0"
 
 
 def save_gcp(ui, save_path: str | Path) -> None:
+    """从界面控件收集全局参数并保存为 GCP 控制卡片。"""
     lines = _comment_header("GCP 全局参数卡片")
     lines.append(f"RunMode   {_combo_code(ui.Runmode, RUNMODE_TO_CODE, '4')}      1")
     lines.append(f"Integcent {_combo_code(ui.Runmode_2, INTEGCENT_TO_CODE, '0')}")
@@ -569,6 +611,7 @@ def save_gcp(ui, save_path: str | Path) -> None:
 
 
 def read_gcp(path: str | Path, ui) -> None:
+    """读取 GCP 全局参数卡片并把运行模式、中心体和力模型写回界面。"""
     lines = _clean_lines(path)
     i = 0
     while i < len(lines):
@@ -644,6 +687,7 @@ def read_gcp(path: str | Path, ui) -> None:
 
 
 def save_lcp(ui, save_path: str | Path) -> None:
+    """从界面控件收集弧段参数、观测权重和解算设置并保存为 LCP。"""
     lines = _comment_header("LCP 弧段参数卡片")
     lines.append("RefSys    1")
     lines.append(f"SatID      {ui.lineEdit_25.text().strip()}")
@@ -726,6 +770,7 @@ def save_lcp(ui, save_path: str | Path) -> None:
 
 
 def read_lcp(path: str | Path, ui) -> None:
+    """读取 LCP 弧段参数卡片并恢复轨道、观测和经验加速度表格。"""
     _clear_table_rows(
         ui.tableWidget_2,
         ui.tableWidget_4,
@@ -857,6 +902,7 @@ def read_lcp(path: str | Path, ui) -> None:
 
 
 def save_simcp(ui, save_path: str | Path) -> None:
+    """从模拟观测表格生成 SimCP 控制卡片，保存时把中文类型转回数字码。"""
     table = ui.tableWidget_17
     rows = list(_nonempty_rows(table))
 
@@ -867,7 +913,7 @@ def save_simcp(ui, save_path: str | Path) -> None:
     lines.append("#")
 
     for row in rows:
-        obs_type = _item_text(table, row, 7, "51")
+        obs_type = _observation_type_code(_item_text(table, row, 7, "51"))
         noise = _item_text(table, row, 8, "0.00d0")
         lines.append(f"SimuSat   {_item_text(table, row, 0, '-999')}")
         if obs_type != "53":
@@ -885,6 +931,7 @@ def save_simcp(ui, save_path: str | Path) -> None:
 
 
 def read_simcp(path: str | Path, ui) -> None:
+    """读取 SimCP 模拟观测卡片并填充模拟观测表格。"""
     table = ui.tableWidget_17
     table.setRowCount(0)
     current_type = ""
@@ -892,6 +939,7 @@ def read_simcp(path: str | Path, ui) -> None:
     current = {}
 
     def append_current():
+        """把当前累计的一组 SimCP 配置写入表格并重置临时状态。"""
         nonlocal current
         if not current.get("sat1") and not current.get("obs_type"):
             current = {}
@@ -906,7 +954,7 @@ def read_simcp(path: str | Path, ui) -> None:
             current.get("backup", ""),
             "",
             "",
-            current.get("obs_type", current_type),
+            _observation_type_label(current.get("obs_type", current_type)),
             current.get("noise", ""),
             current.get("interval", global_interval),
         ]
@@ -958,6 +1006,7 @@ def read_simcp(path: str | Path, ui) -> None:
 
 
 def save_stacp(ui, save_path: str | Path) -> None:
+    """从测站参数表格和全局测站设置生成 StaCP 控制卡片。"""
     table = ui.tableWidget_26
     rows = list(_nonempty_rows(table))
     lines = _comment_header("StaCP 测站参数卡片")
@@ -983,6 +1032,7 @@ def save_stacp(ui, save_path: str | Path) -> None:
 
 
 def read_stacp(path: str | Path, ui) -> None:
+    """读取 StaCP 测站参数卡片并恢复测站表格及测站全局参数。"""
     table = ui.tableWidget_26
     table.setRowCount(0)
     row = -1
@@ -1034,12 +1084,14 @@ def read_stacp(path: str | Path, ui) -> None:
 
 
 def _nonempty_rows(table: QTableWidget):
+    """遍历表格中至少有一个非空单元格的数据行。"""
     for row in range(table.rowCount()):
         if any(_item_text(table, row, col) for col in range(table.columnCount())):
             yield row
 
 
 def _append_plain_row(table: QTableWidget, values: List[str]) -> int:
+    """向表格追加普通文本行，若首行为空则复用首行。"""
     if table.rowCount() == 1 and not any(_item_text(table, 0, col) for col in range(table.columnCount())):
         row = 0
     else:

@@ -93,6 +93,7 @@ except Exception:
 
 @contextmanager
 def working_directory(path: Path):
+    """临时切换当前工作目录，执行完毕后自动恢复原目录。"""
     old = Path.cwd()
     os.chdir(path)
     try:
@@ -106,11 +107,13 @@ class Worker(QObject):
     error = pyqtSignal(str)
 
     def __init__(self, func, *args):
+        """保存后台线程需要执行的函数和参数。"""
         super().__init__()
         self.func = func
         self.args = args
 
     def run(self):
+        """在线程中执行任务函数，并通过信号返回结果或错误信息。"""
         try:
             self.finished.emit(str(self.func(*self.args)))
         except Exception as exc:
@@ -123,10 +126,12 @@ class TableTools:
 
     @staticmethod
     def table_font() -> QFont:
+        """返回全应用表格统一使用的字体设置。"""
         return QFont(TableTools.TABLE_FONT_FAMILY, TableTools.TABLE_FONT_SIZE)
 
     @staticmethod
     def apply_font(table: QTableWidget):
+        """把统一字体应用到表格、表头、单元格和单元格控件。"""
         font = TableTools.table_font()
         table.setFont(font)
         table.viewport().setFont(font)
@@ -150,6 +155,7 @@ class TableTools:
 
     @staticmethod
     def setup(table: QTableWidget, datetime_columns=None):
+        """初始化表格的选择模式、滚动策略、列宽和时间控件列。"""
         datetime_columns = datetime_columns or []
         TableTools.apply_font(table)
         table.horizontalHeader().setVisible(True)
@@ -177,6 +183,7 @@ class TableTools:
 
     @staticmethod
     def add_row(table: QTableWidget, datetime_columns=None, defaults=None):
+        """按默认值向表格追加一行，并为时间列创建时间编辑控件。"""
         datetime_columns = datetime_columns or []
         if callable(defaults):
             defaults = defaults()
@@ -198,6 +205,7 @@ class TableTools:
 
     @staticmethod
     def delete_row(table: QTableWidget, parent):
+        """删除当前选中的表格行，并在删除前弹出确认提示。"""
         row = table.currentRow()
         if row < 0:
             QMessageBox.warning(parent, "提示", "请先选择要删除的行。")
@@ -207,6 +215,7 @@ class TableTools:
 
     @staticmethod
     def edit_row(table: QTableWidget, parent, datetime_columns=None):
+        """用弹窗编辑当前表格行，支持普通文本、下拉框和时间列。"""
         row = table.currentRow()
         if row < 0:
             QMessageBox.warning(parent, "提示", "请先选择要修改的行。")
@@ -270,6 +279,7 @@ class TableTools:
 
 class MainWindow(QMainWindow):
     def __init__(self):
+        """创建主窗口、初始化 UI 状态并连接所有交互信号。"""
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -280,11 +290,13 @@ class MainWindow(QMainWindow):
         self._orbit_stderr_decoder = None
         self._syncing_observation_weight = False
         self._syncing_select_observation = False
+        self._syncing_simulation_observation = False
         self._syncing_per_acc = False
         self._configure_ui()
         self._connect_signals()
 
     def _configure_ui(self):
+        """完成窗口标题、图标、样式、默认表格和主要页面布局初始化。"""
         self.setWindowTitle(APP_DISPLAY_NAME)
         self.setWindowIcon(load_app_icon())
         self.setFont(QFont("Microsoft YaHei", 8))
@@ -307,12 +319,14 @@ class MainWindow(QMainWindow):
         self._apply_secondary_pages_layout()
         self._configure_observation_bias_table()
         self._configure_select_observation_table()
+        self._configure_simulation_observation_table()
         self._configure_per_acc_table()
         self._configure_station_table()
         self._init_default_tables()
         self._setup_tables()
 
     def _configure_global_parameters(self):
+        """初始化全局参数页面的运行模式、积分中心和隐藏项。"""
         self._move_integrator_to_global_parameters()
         self._normalize_global_parameter_labels()
         self._configure_run_modes()
@@ -356,6 +370,7 @@ class MainWindow(QMainWindow):
         self._lock_unreleased_global_parameters()
 
     def _configure_run_modes(self):
+        """重建运行模式下拉框，仅保留当前版本支持的模式。"""
         run_modes = [
             ("轨道预报", "1"),
             ("仿真观测值", "2"),
@@ -368,6 +383,7 @@ class MainWindow(QMainWindow):
         self.ui.Runmode.setToolTip("1=轨道预报；2=仿真观测值；4=精密定轨")
 
     def _normalize_global_parameter_labels(self):
+        """修正全局参数页面中的显示文字，使中文标签更清晰一致。"""
         for label, text in (
             (self.ui.label_4, "引力场文件格式："),
             (self.ui.label_27, "固体潮摄动："),
@@ -376,10 +392,12 @@ class MainWindow(QMainWindow):
             label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
     def _hide_gravity_inversion_order(self):
+        """隐藏当前版本暂未开放的重力场解算阶次输入区域。"""
         self.ui.label_6.hide()
         self.ui.spinBox_2.hide()
 
     def _sync_integration_center_controls(self):
+        """根据积分中心选择同步中心体相关复选框的可用状态。"""
         center_code = str(self.ui.Runmode_2.currentData() or "0")
         is_earth_center = center_code in {"0", "399"}
         if is_earth_center:
@@ -387,6 +405,7 @@ class MainWindow(QMainWindow):
         self.ui.ForceCent_4.setEnabled(not is_earth_center)
 
     def _move_integrator_to_global_parameters(self):
+        """把积分器选择控件从弧段参数页移到全局参数页显示。"""
         if self.ui.comboBox_6.parent() is self.ui.horizontalLayoutWidget_16:
             return
 
@@ -407,10 +426,12 @@ class MainWindow(QMainWindow):
             self.ui.line_16.hide()
 
     def _move_widget_y(self, widget, y):
+        """只调整控件的纵坐标，保留原有横坐标和尺寸。"""
         geometry = widget.geometry()
         widget.setGeometry(geometry.x(), y, geometry.width(), geometry.height())
 
     def _compact_arc_integrator_gap(self):
+        """压缩弧段参数页中移走积分器后留下的垂直空隙。"""
         positions = {
             "line_17": 250,
             "tabWidget_2": 260,
@@ -421,6 +442,7 @@ class MainWindow(QMainWindow):
                 self._move_widget_y(widget, y)
 
     def _compact_arc_parameter_rows(self):
+        """重新排列弧段参数页基础输入行，使页面更紧凑。"""
         positions = {
             "line_13": 80,
             "horizontalLayoutWidget_21": 90,
@@ -439,6 +461,7 @@ class MainWindow(QMainWindow):
                 self._move_widget_y(widget, y)
 
     def _lock_unreleased_global_parameters(self):
+        """禁用当前版本尚未开放的全局参数控件。"""
         self.ui.ForceCent_14.setChecked(False)
         self._lock_widgets(
             self.ui.spinBox_2,
@@ -451,6 +474,7 @@ class MainWindow(QMainWindow):
         )
 
     def _configure_per_acceleration_model(self):
+        """初始化经验加速度模型选择，并隐藏未开放的有限推力选项。"""
         self.ui.comboBox_8.clear()
         self.ui.comboBox_8.addItem("经验加速度模型", 0)
         # self.ui.comboBox_8.addItem("有限推力", 1)
@@ -461,6 +485,7 @@ class MainWindow(QMainWindow):
             self.ui.tabWidget_2.setTabText(tab_index, "经验加速度模型")
 
     def _configure_arc_parameters(self):
+        """配置弧段参数页的可见项、时间控件、快捷按钮和经验加速度入口。"""
         self._comment_out_solar_panel_area()
         self._remove_albedo_radiation_row()
         self._comment_out_doppler_inverse_time()
@@ -537,10 +562,12 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_arc_end_plus5.clicked.connect(lambda: self._set_arc_end_days_after_start(5))
 
     def _comment_out_solar_panel_area(self):
+        """隐藏当前界面暂不使用的太阳帆板面积输入项。"""
         self.ui.label_36.hide()
         self.ui.lineEdit_28.hide()
 
     def _remove_albedo_radiation_row(self):
+        """隐藏反照辐射相关行并禁用对应开关。"""
         for widget_name in ("horizontalLayoutWidget_20", "line_12"):
             widget = getattr(self.ui, widget_name, None)
             if widget:
@@ -549,10 +576,12 @@ class MainWindow(QMainWindow):
         self.ui.checkBox.hide()
 
     def _comment_out_doppler_inverse_time(self):
+        """隐藏多普勒积分时间输入项，保留内部默认处理。"""
         self.ui.label_48.hide()
         self.ui.lineEdit_37.hide()
 
     def _replace_orbit_step_edits(self):
+        """用下拉框替换积分步长和输出步长的自由文本输入。"""
         self.ui.comboBox_integ_step = self._ensure_step_combo(
             "comboBox_integ_step",
             self.ui.lineEdit_38,
@@ -574,6 +603,7 @@ class MainWindow(QMainWindow):
             widget.setFont(step_font)
 
     def _ensure_step_combo(self, name, old_edit, layout):
+        """创建或复用步长下拉框，并接管旧输入框在布局中的位置。"""
         combo = getattr(self.ui, name, None)
         if combo is None:
             combo = QComboBox(old_edit.parent())
@@ -600,6 +630,7 @@ class MainWindow(QMainWindow):
 
     @staticmethod
     def _normalize_step_value(value):
+        """规范化步长数值文本，支持 D/E 科学计数法。"""
         text = str(value or "").strip()
         if not text:
             return "60"
@@ -612,6 +643,7 @@ class MainWindow(QMainWindow):
         return f"{numeric:g}"
 
     def _remove_arc_derivative_filter_rows(self):
+        """隐藏轨道偏导和观测滤波相关行，避免未开放功能被误用。"""
         for widget_name in ("horizontalLayoutWidget_29", "line_18"):
             widget = getattr(self.ui, widget_name, None)
             if widget:
@@ -630,6 +662,7 @@ class MainWindow(QMainWindow):
             widget.setEnabled(False)
 
     def _remove_spice_kernel_path_row(self):
+        """隐藏 SPICE 内核路径输入行，new 版本改用固定资源目录。"""
         for widget_name in ("horizontalLayoutWidget_30", "line_19"):
             widget = getattr(self.ui, widget_name, None)
             if widget:
@@ -639,6 +672,7 @@ class MainWindow(QMainWindow):
         self.ui.lineEdit_44.setEnabled(False)
 
     def _align_arc_parameter_labels(self):
+        """统一弧段参数页标签的右对齐方式。"""
         labels = (
             self.ui.label_32,
             self.ui.label_33,
@@ -661,6 +695,7 @@ class MainWindow(QMainWindow):
             label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
     def _align_arc_first_column(self):
+        """统一弧段参数页第一列标签宽度和左侧边距。"""
         first_column_width = 168
         left_margin = 24
         for layout, label in (
@@ -680,19 +715,23 @@ class MainWindow(QMainWindow):
             self._set_widget_width(label, first_column_width)
 
     def _set_arc_start_to_now(self):
+        """把弧段起止时刻同步设置为当前系统时间。"""
         current = QDateTime.currentDateTime()
         self.ui.dateTimeEdit.setDateTime(current)
         self.ui.dateTimeEdit_2.setDateTime(current)
 
     def _set_arc_end_days_after_start(self, days):
+        """按起始时刻向后推指定天数设置弧段结束时刻。"""
         self.ui.dateTimeEdit_2.setDateTime(self.ui.dateTimeEdit.dateTime().addDays(days))
 
     @staticmethod
     def _lock_widgets(*widgets):
+        """禁用一组控件并保留其显示状态。"""
         for widget in widgets:
             widget.setEnabled(False)
 
     def _ensure_observation_weight_help_button(self):
+        """确保观测值权重表旁存在“说明”按钮并连接帮助弹窗。"""
         button = getattr(self.ui, "pushButton_obs_weight_help", None)
         if button is None:
             button = QPushButton("说明", self.ui.groupBox)
@@ -706,6 +745,7 @@ class MainWindow(QMainWindow):
             button.setProperty("help_connected", True)
 
     def _apply_layout_polish(self):
+        """设置主窗口初始尺寸、工具栏按钮位置和基础布局边距。"""
         self.resize(1040, 720)
         self.setMinimumSize(1000, 680)
         self.ui.centralwidget.setMinimumSize(1000, 0)
@@ -731,6 +771,7 @@ class MainWindow(QMainWindow):
             x += 40
 
     def _apply_style(self):
+        """应用全局 Qt 样式表，统一窗口、表格、按钮和输入框外观。"""
         self.setStyleSheet(
             """
             QMainWindow, QWidget#centralwidget {
@@ -868,6 +909,7 @@ class MainWindow(QMainWindow):
         )
 
     def _align_text_widgets(self):
+        """统一标签、输入控件、按钮和分隔线的尺寸与对齐方式。"""
         section_labels = {
             "label_8", "label_125", "label_126", "label_127", "label_128",
             "label_58", "label_60",
@@ -918,30 +960,36 @@ class MainWindow(QMainWindow):
                 frame.setMidLineWidth(0)
 
     def _set_spacer_width(self, layout, index, width):
+        """把指定布局项中的 spacer 调整为固定宽度。"""
         item = layout.itemAt(index)
         if item and item.spacerItem():
             item.spacerItem().changeSize(width, 20, QSizePolicy.Fixed, QSizePolicy.Minimum)
 
     def _set_expanding_spacer(self, layout, index, width=0):
+        """把指定布局项中的 spacer 调整为可扩展宽度。"""
         item = layout.itemAt(index)
         if item and item.spacerItem():
             item.spacerItem().changeSize(width, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
     def _ensure_trailing_expander(self, layout):
+        """为布局末尾补一个只添加一次的弹性伸展项。"""
         if not layout.property("trailing_expander_added"):
             layout.addStretch(1)
             layout.setProperty("trailing_expander_added", True)
 
     def _set_widget_width(self, widget, width):
+        """把控件宽度固定到指定值，同时保留原有垂直尺寸策略。"""
         widget.setMinimumWidth(width)
         widget.setMaximumWidth(width)
         widget.setSizePolicy(QSizePolicy.Fixed, widget.sizePolicy().verticalPolicy())
 
     def _refresh_layout(self, layout):
+        """强制布局重新计算几何尺寸并立即生效。"""
         layout.invalidate()
         layout.activate()
 
     def _apply_global_page_layout(self):
+        """根据窗口宽度重排全局参数页的各行控件和行星参数区。"""
         page_width = max(self.ui.tab.width() - 8, 980)
         rows = [
             self.ui.horizontalLayoutWidget,
@@ -1109,13 +1157,16 @@ class MainWindow(QMainWindow):
         self._refresh_layout(self.ui.horizontalLayout_16)
 
     def _page_size(self, page):
+        """计算页面可用宽高，并给响应式布局提供最小尺寸。"""
         return max(page.width() - 8, 980), max(page.height() - 8, 560)
 
     def _stretch_width(self, widget, width):
+        """把控件从当前位置拉伸到指定页面宽度。"""
         geometry = widget.geometry()
         widget.setGeometry(geometry.x(), geometry.y(), max(width - geometry.x(), 1), geometry.height())
 
     def _stretch_layout_rows(self, names, width):
+        """按对象名批量拉伸横向布局容器。"""
         for name in names:
             widget = getattr(self.ui, name, None)
             if widget:
@@ -1124,11 +1175,13 @@ class MainWindow(QMainWindow):
                     widget.layout().invalidate()
 
     def _move_button_column(self, buttons, x):
+        """把一组表格侧边按钮移动到同一纵列。"""
         for button in buttons:
             geometry = button.geometry()
             button.setGeometry(x, geometry.y(), geometry.width(), geometry.height())
 
     def _fill_table_with_side_buttons(self, table, buttons, page_width, page_height, bottom_margin=12):
+        """让表格填满页面剩余区域，并把操作按钮放到表格右侧。"""
         table_geometry = table.geometry()
         button_width = max(button.width() for button in buttons)
         button_x = max(page_width - button_width - 10, table_geometry.x() + 280)
@@ -1138,6 +1191,7 @@ class MainWindow(QMainWindow):
         self._move_button_column(buttons, button_x)
 
     def _fill_group_table_with_side_buttons(self, group, table, buttons):
+        """在分组框内调整表格和右侧按钮列的宽高。"""
         table_geometry = table.geometry()
         button_width = max(button.width() for button in buttons)
         button_x = max(group.width() - button_width - 10, table_geometry.x() + 180)
@@ -1147,6 +1201,7 @@ class MainWindow(QMainWindow):
         self._move_button_column(buttons, button_x)
 
     def _fill_group_table_below_buttons(self, group, table):
+        """让分组框内无侧边按钮的表格填满下方空间。"""
         geometry = table.geometry()
         table.setGeometry(
             geometry.x(),
@@ -1156,6 +1211,7 @@ class MainWindow(QMainWindow):
         )
 
     def _apply_arc_page_layout(self, page_width, page_height):
+        """重排弧段参数页和内部观测/经验加速度页签的响应式布局。"""
         self._compact_arc_parameter_rows()
         self._compact_arc_integrator_gap()
         self._stretch_layout_rows([f"horizontalLayoutWidget_{index}" for index in range(17, 31)], page_width)
@@ -1252,6 +1308,7 @@ class MainWindow(QMainWindow):
         self._stretch_layout_rows(["horizontalLayoutWidget_31"], sub_width)
 
     def _apply_secondary_pages_layout(self):
+        """重排模拟观测、测站参数、运行日志和图表页面的布局。"""
         page_width, page_height = self._page_size(self.ui.tab_2)
         self._apply_arc_page_layout(page_width, page_height)
 
@@ -1292,24 +1349,29 @@ class MainWindow(QMainWindow):
         )
 
     def _refresh_responsive_layout(self):
+        """在窗口尺寸变化后刷新主布局和各页面响应式布局。"""
         if hasattr(self, "ui"):
             self.ui.verticalLayoutWidget.setGeometry(16, 48, max(self.width() - 32, 968), max(self.height() - 100, 580))
             self._apply_global_page_layout()
             self._apply_secondary_pages_layout()
 
     def _schedule_layout_refresh(self, *_):
+        """延迟触发布局刷新，确保页签切换后控件尺寸已更新。"""
         QTimer.singleShot(0, self._refresh_responsive_layout)
         QTimer.singleShot(50, self._refresh_responsive_layout)
 
     def resizeEvent(self, event):
+        """响应窗口缩放事件并重新计算页面布局。"""
         super().resizeEvent(event)
         self._refresh_responsive_layout()
 
     def showEvent(self, event):
+        """响应窗口首次显示事件，安排一次完整布局刷新。"""
         super().showEvent(event)
         self._schedule_layout_refresh()
 
     def _apply_toolbar_icons(self):
+        """为顶部工具栏按钮加载图标并设置提示文本。"""
         buttons = [
             (self.ui.pushButton, "new_scheme.png", "新建定轨方案"),
             (self.ui.pushButton_2, "open_scheme.png", "打开定轨方案"),
@@ -1327,11 +1389,13 @@ class MainWindow(QMainWindow):
             button.setToolTip(tooltip)
 
     def _connect_signals(self):
+        """连接菜单、按钮、表格和任务控制相关的 Qt 信号。"""
         self.ui.tabWidget.currentChanged.connect(self._schedule_layout_refresh)
         self.ui.tabWidget_2.currentChanged.connect(self._schedule_layout_refresh)
         self.ui.Runmode_2.currentIndexChanged.connect(self._sync_integration_center_controls)
         self.ui.tableWidget_2.itemChanged.connect(self._on_observation_weight_item_changed)
         self.ui.tableWidget_6.itemChanged.connect(self._on_select_observation_item_changed)
+        self.ui.tableWidget_17.itemChanged.connect(self._on_simulation_observation_item_changed)
         self.ui.tableWidget_16.itemChanged.connect(self._on_per_acc_item_changed)
 
         self.ui.pushButton.clicked.connect(self.new_scheme)
@@ -1368,6 +1432,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_84.clicked.connect(self.stop_tasks)
 
     def _init_default_tables(self):
+        """清空并填充各参数表格的默认行。"""
         defaults = {
             self.ui.tableWidget_2: [["51-双程测距", "2.0D-0", "meter"], ["52-双程测速", "1.0D-0", "mm/s"]],
             self.ui.tableWidget_4: [["51", "4.0D-0", "1.0D+15"]],
@@ -1393,6 +1458,7 @@ class MainWindow(QMainWindow):
             TableTools.apply_font(table)
 
     def _configured_tables(self):
+        """返回需要统一字体和刷新处理的业务表格列表。"""
         return [
             self.ui.tableWidget_2,
             self.ui.tableWidget_4,
@@ -1406,22 +1472,27 @@ class MainWindow(QMainWindow):
         ]
 
     def _apply_configured_table_fonts(self):
+        """对所有业务表格重新应用统一字体。"""
         for table in self._configured_tables():
             TableTools.apply_font(table)
 
     def _simulation_observation_default_row(self):
+        """生成一行默认 SimCP 模拟观测配置，时间跟随当前弧段。"""
         start = self.ui.dateTimeEdit.dateTime().toString("yyyy-MM-dd HH:mm:ss.zzz")
         end = self.ui.dateTimeEdit_2.dateTime().toString("yyyy-MM-dd HH:mm:ss.zzz")
-        return ["0000", "", "", "", "", start, end, "51", "2.000d-0", "30.000"]
+        return ["0000", "", "", "", "", start, end, "51-双程测距", "2.000d-0", "30.000"]
 
     def _station_default_row(self):
+        """生成一行默认测站参数，作为新增测站时的初始值。"""
         return ["001", "SHAO", "激活", "15.0", "直角坐标系XYZ", "-2831686.9130", "4675733.6660", "3275327.6900", "", "", "", "", "地球测站"]
 
     def _add_station_row(self):
+        """向测站表格新增默认测站行并刷新下拉列。"""
         TableTools.add_row(self.ui.tableWidget_26, [], self._station_default_row())
         self._configure_station_table()
 
     def _setup_tables(self):
+        """为所有业务表格绑定增删改按钮、时间列和默认行配置。"""
         configs = [
             (self.ui.tableWidget_2, self.ui.pushButton_7, self.ui.pushButton_8, self.ui.pushButton_9, [], ["51-双程测距", "2.0D-0", "meter"]),
             (self.ui.tableWidget_4, self.ui.pushButton_13, self.ui.pushButton_14, self.ui.pushButton_15, [], ["51", "4.0D-0", "1.0D+15"]),
@@ -1444,10 +1515,12 @@ class MainWindow(QMainWindow):
         self._configure_observation_weight_table()
         self._configure_observation_bias_table()
         self._configure_select_observation_table()
+        self._configure_simulation_observation_table()
         self._configure_per_acc_table()
         self._configure_station_table()
 
     def _configure_per_acc_table(self):
+        """配置经验加速度表头，并同步方向和模型的中文显示。"""
         table = self.ui.tableWidget_16
         headers = ("方向", "模型", "数值", "先验误差")
         table.setColumnCount(len(headers))
@@ -1461,6 +1534,7 @@ class MainWindow(QMainWindow):
         TableTools.apply_font(table)
 
     def _configure_station_table(self):
+        """配置测站参数表头和状态、坐标类型、所在天体下拉列。"""
         table = self.ui.tableWidget_26
         headers = (
             "测站编号",
@@ -1491,6 +1565,7 @@ class MainWindow(QMainWindow):
         TableTools.apply_font(table)
 
     def _fit_station_columns(self):
+        """按可用宽度自适应测站参数表的 13 个列宽。"""
         table = self.ui.tableWidget_26
         if table.columnCount() < 13:
             return
@@ -1512,6 +1587,7 @@ class MainWindow(QMainWindow):
             table.setColumnWidth(col, max(width, 1))
 
     def _set_station_combo_cell(self, table, row, col, options, default):
+        """把测站表指定列设置为下拉框，并兼容旧卡片中的数字代码。"""
         current = self._table_cell_text(table, row, col) or default
         if current in ("1", "1.0") or current.startswith("1-"):
             if col == 2:
@@ -1547,6 +1623,7 @@ class MainWindow(QMainWindow):
 
     @staticmethod
     def _table_cell_text(table, row, col):
+        """读取表格单元格文本，兼容普通项和下拉框控件。"""
         widget = table.cellWidget(row, col)
         if isinstance(widget, QComboBox):
             return widget.currentText().strip()
@@ -1554,6 +1631,7 @@ class MainWindow(QMainWindow):
         return item.text().strip() if item and item.text() else ""
 
     def _configure_select_observation_table(self):
+        """配置选择观测值表头，并把观测类型同步为中文标签。"""
         table = self.ui.tableWidget_6
         headers = ("观测值类型", "上行位", "下行位", "Passnumber", "卫星1编号", "卫星2编号", "起始时刻", "结束时刻")
         table.setColumnCount(len(headers))
@@ -1571,6 +1649,7 @@ class MainWindow(QMainWindow):
         TableTools.apply_font(table)
 
     def _fit_select_observation_columns(self):
+        """按可用宽度自适应选择观测值表各列宽度。"""
         table = self.ui.tableWidget_6
         if table.columnCount() < 8:
             return
@@ -1593,7 +1672,15 @@ class MainWindow(QMainWindow):
         for col, width in enumerate(widths):
             table.setColumnWidth(col, max(width, 1))
 
+    def _configure_simulation_observation_table(self):
+        """刷新模拟观测值表的观测类型中文标签和字体。"""
+        table = self.ui.tableWidget_17
+        for row in range(table.rowCount()):
+            self._sync_simulation_observation_row(row)
+        TableTools.apply_font(table)
+
     def _configure_observation_bias_table(self):
+        """配置测量偏差固定表表头和列宽策略。"""
         table = self.ui.tableWidget_5
         headers = ("观测值类型", "下行位", "上行位", "偏差初值", "起始时刻", "结束时刻", "先验误差")
         table.setColumnCount(len(headers))
@@ -1608,6 +1695,7 @@ class MainWindow(QMainWindow):
         TableTools.apply_font(table)
 
     def _fit_observation_bias_columns(self):
+        """按可用宽度自适应测量偏差固定表各列宽度。"""
         table = self.ui.tableWidget_5
         if table.columnCount() < 7:
             return
@@ -1631,6 +1719,7 @@ class MainWindow(QMainWindow):
             table.setColumnWidth(col, max(width, 1))
 
     def _configure_observation_weight_table(self):
+        """配置观测值权重表，并同步观测类型中文标签和单位。"""
         table = self.ui.tableWidget_2
         for col, text in enumerate(("观测值类型", "观测值权重", "观测值单位")):
             item = table.horizontalHeaderItem(col) or QTableWidgetItem()
@@ -1643,6 +1732,7 @@ class MainWindow(QMainWindow):
 
     @staticmethod
     def _observation_type_code(value):
+        """从观测类型单元格文本中提取 LCP/SimCP 使用的观测类型代码。"""
         text = str(value or "").strip()
         for code in OBSERVATION_WEIGHT_HELP:
             if text == code or text.startswith(f"{code}-"):
@@ -1651,17 +1741,20 @@ class MainWindow(QMainWindow):
 
     @staticmethod
     def _observation_type_label(code):
+        """把观测类型代码转换为“代码-中文解释”的显示文本。"""
         code = str(code or "").strip()
         info = OBSERVATION_WEIGHT_HELP.get(code)
         return f"{code}-{info[0]}" if info else code
 
     @staticmethod
     def _observation_unit(code):
+        """根据观测类型代码返回权重表中应显示的单位。"""
         info = OBSERVATION_WEIGHT_HELP.get(str(code or "").strip())
         return info[1] if info else ""
 
     @staticmethod
     def _select_observation_type_code(value):
+        """把选择观测值表中的类型文本转换为 SelectObs 代码。"""
         text = str(value or "").strip()
         for code in SELECT_OBSERVATION_TYPE_HELP:
             if text == code or text.startswith(f"{code}-"):
@@ -1675,12 +1768,14 @@ class MainWindow(QMainWindow):
 
     @staticmethod
     def _select_observation_type_label(code):
+        """把 SelectObs 类型代码转换为“代码-中文解释”的显示文本。"""
         code = str(code or "").strip()
         label = SELECT_OBSERVATION_TYPE_HELP.get(code)
         return f"{code}-{label}" if label else code
 
     @staticmethod
     def _coded_label_code(value, mapping):
+        """用给定映射从代码标签文本中提取标准代码。"""
         text = str(value or "").strip()
         for code in mapping:
             if text == code or text.startswith(f"{code}-"):
@@ -1693,11 +1788,13 @@ class MainWindow(QMainWindow):
 
     @staticmethod
     def _coded_label(code, mapping):
+        """用给定映射把标准代码转换为“代码-中文解释”文本。"""
         code = str(code or "").strip()
         label = mapping.get(code)
         return f"{code}-{label}" if label else code
 
     def _sync_observation_weight_row(self, row):
+        """同步观测权重表单行的观测类型标签和单位列。"""
         if row < 0 or self._syncing_observation_weight:
             return
         table = self.ui.tableWidget_2
@@ -1725,7 +1822,29 @@ class MainWindow(QMainWindow):
         finally:
             self._syncing_observation_weight = False
 
+    def _sync_simulation_observation_row(self, row):
+        """同步模拟观测值表单行的观测类型中文标签。"""
+        if row < 0 or self._syncing_simulation_observation:
+            return
+        table = self.ui.tableWidget_17
+        if row >= table.rowCount() or table.columnCount() <= 7:
+            return
+        code = self._observation_type_code(self._table_text(table, row, 7))
+        label = self._observation_type_label(code)
+        if not label:
+            return
+        self._syncing_simulation_observation = True
+        try:
+            item = table.item(row, 7) or QTableWidgetItem()
+            item.setText(label)
+            item.setFont(TableTools.table_font())
+            item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            table.setItem(row, 7, item)
+        finally:
+            self._syncing_simulation_observation = False
+
     def _sync_per_acc_row(self, row):
+        """同步经验加速度表单行的方向和模型中文标签。"""
         if row < 0 or self._syncing_per_acc:
             return
         table = self.ui.tableWidget_16
@@ -1750,10 +1869,12 @@ class MainWindow(QMainWindow):
             self._syncing_per_acc = False
 
     def _on_observation_weight_item_changed(self, item):
+        """处理观测权重表单元格修改，触发类型和单位同步。"""
         if item and item.tableWidget() is self.ui.tableWidget_2 and item.column() in (0, 2):
             self._sync_observation_weight_row(item.row())
 
     def _on_select_observation_item_changed(self, item):
+        """处理选择观测值表类型列修改，自动补全中文说明。"""
         if (
             not item
             or item.tableWidget() is not self.ui.tableWidget_6
@@ -1773,17 +1894,25 @@ class MainWindow(QMainWindow):
         finally:
             self._syncing_select_observation = False
 
+    def _on_simulation_observation_item_changed(self, item):
+        """处理模拟观测值表类型列修改，自动补全中文说明。"""
+        if item and item.tableWidget() is self.ui.tableWidget_17 and item.column() == 7:
+            self._sync_simulation_observation_row(item.row())
+
     def _on_per_acc_item_changed(self, item):
+        """处理经验加速度表方向/模型列修改，自动补全中文说明。"""
         if item and item.tableWidget() is self.ui.tableWidget_16 and item.column() in (0, 1):
             self._sync_per_acc_row(item.row())
 
     def new_scheme(self):
+        """新建默认定轨方案，重置表格、时间控件和日志输出。"""
         self._configure_global_parameters()
         self._init_default_tables()
         self._setup_datetime_cells()
         self._configure_observation_weight_table()
         self._configure_observation_bias_table()
         self._configure_select_observation_table()
+        self._configure_simulation_observation_table()
         self._configure_per_acc_table()
         self._apply_configured_table_fonts()
         self.current_scheme_dir = DEFAULT_SCHEME_DIR
@@ -1791,6 +1920,7 @@ class MainWindow(QMainWindow):
         self._log("已新建默认定轨方案。")
 
     def open_scheme(self):
+        """选择方案目录并批量导入其中存在的 GCP/LCP/SimCP/StaCP 卡片。"""
         directory = QFileDialog.getExistingDirectory(self, "选择定轨方案目录", str(self.current_scheme_dir))
         if not directory:
             return
@@ -1806,9 +1936,11 @@ class MainWindow(QMainWindow):
         self._log(f"已打开方案目录：{self.current_scheme_dir}\n已导入：{', '.join(loaded) if loaded else '未发现卡片文件'}")
 
     def save_scheme(self):
+        """把当前界面参数保存到当前方案目录。"""
         self._save_cards(self.current_scheme_dir)
 
     def save_scheme_as(self):
+        """选择新目录并把当前界面参数另存为一套控制卡片。"""
         directory = QFileDialog.getExistingDirectory(self, "选择保存目录", str(self.current_scheme_dir))
         if not directory:
             return
@@ -1816,6 +1948,7 @@ class MainWindow(QMainWindow):
         self._save_cards(self.current_scheme_dir)
 
     def import_card(self, card_name: str):
+        """导入指定类型的单个控制卡片并刷新相关表格显示。"""
         file_path, _ = QFileDialog.getOpenFileName(self, f"选择 {card_name} 文件", str(self.current_scheme_dir), "卡片文件 (*);;所有文件 (*)")
         if file_path:
             self._load_card_from_path(card_name, Path(file_path))
@@ -1824,9 +1957,11 @@ class MainWindow(QMainWindow):
             self._log(f"已导入 {card_name}：{file_path}")
 
     def _save_cards(self, directory: Path):
+        """保存全部控制卡片并向用户显示保存结果。"""
         self._write_cards(directory, notify=True)
 
     def _write_cards(self, directory: Path, notify: bool = False):
+        """把当前界面数据写出为 GCP、LCP、SimCP 和 StaCP 四类卡片。"""
         try:
             directory.mkdir(parents=True, exist_ok=True)
             card_io.save_gcp(self.ui, directory / "GCP")
@@ -1844,6 +1979,7 @@ class MainWindow(QMainWindow):
                 raise
 
     def _load_card_from_path(self, card_name: str, path: Path):
+        """按卡片类型调用对应读取函数，并执行导入后的界面同步。"""
         loaders = {
             "GCP": card_io.read_gcp,
             "LCP": card_io.read_lcp,
@@ -1860,10 +1996,13 @@ class MainWindow(QMainWindow):
             self._configure_observation_bias_table()
             self._configure_select_observation_table()
             self._configure_per_acc_table()
+        elif card_name == "SimCP":
+            self._configure_simulation_observation_table()
         elif card_name == "StaCP":
             self._configure_station_table()
 
     def show_observation_weight_help(self):
+        """根据当前观测权重表生成观测类型、单位和权重说明弹窗。"""
         lines = []
         table = self.ui.tableWidget_2
         for row in range(table.rowCount()):
@@ -1882,26 +2021,31 @@ class MainWindow(QMainWindow):
 
     @staticmethod
     def _table_text(table: QTableWidget, row: int, col: int) -> str:
+        """安全读取普通表格单元格文本，空单元格返回空字符串。"""
         item = table.item(row, col)
         return item.text().strip() if item and item.text() else ""
 
     def configure_and_generate_observations(self):
+        """保存当前方案并启动模拟观测值生成任务。"""
         self._write_cards(self.current_scheme_dir)
         self._run_usefortran("正在配置并生成模拟观测值，请稍候...", self._genobs_job)
 
     def _genobs_job(self):
+        """后台执行 SimCP 配置兼容流程和模拟观测值生成流程。"""
         self._require_usefortran()
         msg = UseFortran.copy_simcp_to_target()
         output = UseFortran.genobs(self.ui)
         return f"{msg}\n{output}"
 
     def copy_observations_to_arc(self):
+        """保存方案后把生成的观测文件复制到界面指定的弧段目录。"""
         self._write_cards(self.current_scheme_dir)
         result = self._copy_obs_files_to_arc(self.ui.lineEdit_87.text().strip())
         self._log(result)
 
     @staticmethod
     def _copy_obs_files_to_arc(arc_id: str) -> str:
+        """把 scheme/observations.csv 复制到指定编号弧段的 InputDATA 目录。"""
         if not arc_id:
             return "未输入目标弧段编号。"
         if arc_id not in {"001", "002", "003"}:
@@ -1915,9 +2059,11 @@ class MainWindow(QMainWindow):
         return f"弧段 {arc_id} 配置完成，已复制文件：\n{dst_dir / src.name}"
 
     def process_observation_files(self):
+        """启动观测文件清理和重编号任务。"""
         self._run_usefortran("正在处理观测值文件...", self._process_obs_job)
 
     def _process_obs_job(self):
+        """后台遍历三个弧段目录并调用观测文件处理逻辑。"""
         self._require_usefortran()
         base = APP_DIR / "output" / "Arc"
         messages = []
@@ -1927,14 +2073,17 @@ class MainWindow(QMainWindow):
         return "\n".join(messages)
 
     def select_solve_global_exe(self):
+        """选择并运行旧版全局参数与弧段参数解算程序。"""
         default = APP_DIR / "external" / "Solve_Global_Para.exe"
         self._select_and_run_exe(default, "选择全局参数与弧段参数解算程序")
 
     def select_ast_ephe_exe(self):
+        """选择并运行旧版小行星星历解算程序。"""
         default = APP_DIR / "external" / "Batch_developing.exe"
         self._select_and_run_exe(default, "选择小行星星历解算程序")
 
     def start_orbit_determination(self):
+        """保存方案并启动外部定轨测试程序，实时接收命令行输出。"""
         if self.orbit_process and self.orbit_process.state() != QProcess.NotRunning:
             QMessageBox.information(self, "定轨程序运行中", "当前定轨任务尚未结束，请先停止任务。")
             return
@@ -1972,15 +2121,18 @@ class MainWindow(QMainWindow):
         process.start()
 
     def _on_orbit_process_started(self):
+        """记录外部定轨程序已成功启动的状态。"""
         self._log("外部定轨程序已启动，正在实时接收命令行输出...")
 
     def _read_orbit_stdout(self):
+        """读取外部定轨程序标准输出并追加到日志窗口。"""
         if not self.orbit_process or not self._orbit_stdout_decoder:
             return
         data = bytes(self.orbit_process.readAllStandardOutput())
         self._append_log_text(self._orbit_stdout_decoder.decode(data))
 
     def _read_orbit_stderr(self):
+        """读取外部定轨程序标准错误并追加到日志窗口。"""
         if not self.orbit_process or not self._orbit_stderr_decoder:
             return
         data = bytes(self.orbit_process.readAllStandardError())
@@ -1989,6 +2141,7 @@ class MainWindow(QMainWindow):
             self._append_log_text(f"[stderr] {text}")
 
     def _on_orbit_process_error(self, error):
+        """处理外部定轨程序启动失败等 QProcess 错误并恢复按钮状态。"""
         if error == QProcess.FailedToStart:
             detail = self.orbit_process.errorString() if self.orbit_process else "未知错误"
             self._log(f"定轨程序启动失败：{detail}")
@@ -2001,6 +2154,7 @@ class MainWindow(QMainWindow):
             self._orbit_stderr_decoder = None
 
     def _on_orbit_process_finished(self, exit_code, exit_status):
+        """处理外部定轨程序结束事件，刷新日志并释放进程状态。"""
         if self._orbit_stdout_decoder:
             self._append_log_text(self._orbit_stdout_decoder.decode(b"", final=True))
         if self._orbit_stderr_decoder:
@@ -2021,16 +2175,19 @@ class MainWindow(QMainWindow):
         self._orbit_stderr_decoder = None
 
     def _select_and_run_exe(self, default_path: Path, title: str):
+        """弹出文件选择框选择可执行程序并启动运行。"""
         start_dir = str(default_path.parent if default_path.parent.exists() else LEGACY_DIR)
         file_path, _ = QFileDialog.getOpenFileName(self, title, start_dir, "可执行程序 (*.exe);;所有文件 (*)")
         if file_path:
             self._run_exe(Path(file_path))
 
     def _run_exe(self, exe_path: Path):
+        """把外部可执行程序包装成后台任务运行。"""
         self._run_usefortran(f"正在运行：{exe_path}", lambda: self._execute_program(exe_path))
 
     @staticmethod
     def _execute_program(exe_path: Path):
+        """同步执行指定 EXE，并返回其标准输出和错误输出。"""
         if not exe_path.exists():
             return f"未找到执行文件：{exe_path}"
         flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
@@ -2048,22 +2205,27 @@ class MainWindow(QMainWindow):
         return (out or "") + (f"\n[stderr]\n{err}" if err else "")
 
     def configure_ast_ephe_observations(self):
+        """启动旧版小行星星历观测值配置任务。"""
         self._run_usefortran("正在配置小行星星历观测值...", self._gen_obs_for_asteph_job)
 
     def _gen_obs_for_asteph_job(self):
+        """在旧项目目录中调用小行星星历观测值配置接口。"""
         self._require_usefortran()
         with working_directory(LEGACY_DIR):
             return UseFortran.run_gen_obs_for_solve_asteph()
 
     def merge_ephemeris(self):
+        """启动旧版多弧段探测器星历融合任务。"""
         self._run_usefortran("正在融合多弧段探测器星历...", self._merge_ephe_job)
 
     def _merge_ephe_job(self):
+        """在旧项目目录中调用星历融合兼容接口。"""
         self._require_usefortran()
         with working_directory(LEGACY_DIR):
             return UseFortran.merge_our_own_ephe()
 
     def show_orbit_plot(self):
+        """选择轨道结果文件并在图表页显示三维轨道动画。"""
         default = APP_DIR / "output" / "orbit_result.csv"
         start_dir = str(default.parent if default.parent.exists() else APP_DIR)
         file_path, _ = QFileDialog.getOpenFileName(self, "选择轨道文件", start_dir, "Orbit files (*.csv *.spk *.bsp);;所有文件 (*)")
@@ -2084,6 +2246,7 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "绘图失败", str(exc))
 
     def show_residual_plot(self):
+        """读取残差文件并在图表页显示残差散点图。"""
         try:
             from Residual import show_residual_in_widget2
 
@@ -2094,6 +2257,7 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "残差分析失败", str(exc))
 
     def clear_visual_widget(self):
+        """清空图表页容器中已有的画布或其他子控件。"""
         layout = self.ui.widget.layout()
         if layout:
             while layout.count():
@@ -2103,6 +2267,7 @@ class MainWindow(QMainWindow):
                     widget.deleteLater()
 
     def _visual_layout(self):
+        """获取或创建图表页容器的垂直布局。"""
         layout = self.ui.widget.layout()
         if layout is None:
             layout = QVBoxLayout(self.ui.widget)
@@ -2110,6 +2275,7 @@ class MainWindow(QMainWindow):
         return layout
 
     def stop_tasks(self):
+        """停止正在运行的外部进程和后台线程，或清空当前输出日志。"""
         process_stopped = False
         process = self.orbit_process
         if process and process.state() != QProcess.NotRunning:
@@ -2134,9 +2300,11 @@ class MainWindow(QMainWindow):
             self.ui.statusbar.showMessage("定轨输出已清空。")
 
     def _run_usefortran(self, start_message: str, func):
+        """兼容旧命名的任务启动入口，内部转交给通用后台任务函数。"""
         self._run_task(start_message, func)
 
     def _run_task(self, start_message: str, func):
+        """创建 QThread 和 Worker 执行耗时任务，并把结果写入日志。"""
         self.ui.tabWidget.setCurrentWidget(self.ui.tab_5)
         self._log(start_message)
         thread = QThread(self)
@@ -2153,16 +2321,20 @@ class MainWindow(QMainWindow):
         self.threads.append(thread)
 
     def _on_worker_finished(self, text: str):
+        """处理后台任务成功结束后的日志输出。"""
         self._log(text or "任务完成。")
 
     def _on_worker_error(self, text: str):
+        """处理后台任务异常结束后的日志输出。"""
         self._log(f"任务失败：{text}")
 
     def _require_usefortran(self):
+        """确认 UseFortran 兼容模块可用，否则抛出明确错误。"""
         if UseFortran is None:
             raise RuntimeError("旧项目 UseFortran.py 模块导入失败。")
 
     def _setup_datetime_cells(self):
+        """确保所有配置为时间列的表格单元格都使用 QDateTimeEdit 控件。"""
         for table, columns in [
             (self.ui.tableWidget_5, [4, 5]),
             (self.ui.tableWidget_6, [6, 7]),
@@ -2179,12 +2351,14 @@ class MainWindow(QMainWindow):
             TableTools.apply_font(table)
 
     def _log(self, message: str):
+        """向日志窗口和状态栏写入一条消息。"""
         if self.ui.textEdit.toPlainText() and not self.ui.textEdit.toPlainText().endswith("\n"):
             self._append_log_text("\n")
         self._append_log_text(f"{message.rstrip()}\n" if message else "")
         self.ui.statusbar.showMessage(message.splitlines()[0] if message else "")
 
     def _append_log_text(self, text: str):
+        """把文本追加到日志窗口末尾并滚动到最新位置。"""
         if not text:
             return
         cursor = self.ui.textEdit.textCursor()
@@ -2194,6 +2368,7 @@ class MainWindow(QMainWindow):
         self.ui.textEdit.ensureCursorVisible()
 
     def show_about(self):
+        """显示软件版本说明、功能范围和近期兼容性修复。"""
         QMessageBox.information(
             self,
             "关于",
@@ -2214,11 +2389,13 @@ class MainWindow(QMainWindow):
         )
 
     def closeEvent(self, event):
+        """窗口关闭前停止后台任务并继续执行默认关闭流程。"""
         self.stop_tasks()
         super().closeEvent(event)
 
 
 def configure_windows_app_id():
+    """在 Windows 上设置任务栏应用 ID，确保图标和窗口分组正确。"""
     if sys.platform != "win32":
         return
     try:
@@ -2230,11 +2407,13 @@ def configure_windows_app_id():
 
 
 def load_app_icon() -> QIcon:
+    """从 assets/icons 加载应用图标，缺失时返回空图标。"""
     icon_path = iconsource_rc.icon_path(APP_ICON_NAME)
     return QIcon(icon_path) if Path(icon_path).exists() else QIcon()
 
 
 def main():
+    """配置高 DPI、创建 QApplication 和主窗口，并进入 Qt 事件循环。"""
     configure_windows_app_id()
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)

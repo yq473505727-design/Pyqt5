@@ -11,11 +11,13 @@ from PyQt5.QtWidgets import QFileDialog, QMessageBox, QVBoxLayout
 
 
 def j2000_datetime():
+    """返回 J2000 历元对应的 Qt UTC 时间对象。"""
     return QDateTime(2000, 1, 1, 12, 0, 0, 0, Qt.UTC)
 
 
 class ResidualCanvas(FigureCanvas):
     def __init__(self, times, res1, res2=None, filetype=None, parent=None):
+        """创建残差绘图画布，并立即绘制传入的残差序列。"""
         self.fig = Figure(figsize=(12, 5))
         super().__init__(self.fig)
         self.setParent(parent)
@@ -24,6 +26,7 @@ class ResidualCanvas(FigureCanvas):
         self.plot_residual(times, res1, res2, filetype)
 
     def plot_residual(self, times, res1, res2=None, filetype=None):
+        """清空坐标轴并绘制一组或两组残差散点。"""
         x = [float(t) for t in times]
         self.ax.clear()
         self.ax.scatter(x, res1, s=10, label="Residual")
@@ -36,6 +39,7 @@ class ResidualCanvas(FigureCanvas):
 
 
 def show_residual_in_widget2(parent, widget2):
+    """弹出文件选择框读取残差文件，并把残差图嵌入指定 Qt 容器。"""
     default = Path(__file__).resolve().parent / "output"
     file_path, _ = QFileDialog.getOpenFileName(
         parent,
@@ -65,6 +69,7 @@ def show_residual_in_widget2(parent, widget2):
 
 
 def read_residual_file(path: Path):
+    """读取 CSV 或旧格式残差文件，返回时间和残差序列。"""
     if path.suffix.lower() == ".csv":
         with path.open("r", encoding="utf-8-sig", newline="") as f:
             reader = csv.DictReader(f)
