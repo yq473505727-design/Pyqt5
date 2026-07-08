@@ -14,7 +14,7 @@
    <string>定轨</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="button_new_scheme">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -27,7 +27,7 @@
      <string>新建定轨方案</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="button_open_scheme">
     <property name="geometry">
      <rect>
       <x>30</x>
@@ -40,7 +40,7 @@
      <string>打开定轨方案</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_3">
+   <widget class="QPushButton" name="button_save_scheme">
     <property name="geometry">
      <rect>
       <x>60</x>
@@ -53,7 +53,7 @@
      <string>保存定轨方案</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_4">
+   <widget class="QPushButton" name="button_save_scheme_as">
     <property name="geometry">
      <rect>
       <x>90</x>
@@ -66,7 +66,7 @@
      <string>另存定轨方案</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_5">
+   <widget class="QPushButton" name="button_start_orbit">
     <property name="geometry">
      <rect>
       <x>150</x>
@@ -79,7 +79,7 @@
      <string>开始定轨</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_6">
+   <widget class="QPushButton" name="button_show_chart">
     <property name="geometry">
      <rect>
       <x>180</x>
@@ -107,11 +107,11 @@
        <property name="currentIndex">
         <number>0</number>
        </property>
-       <widget class="QWidget" name="tab">
+       <widget class="QWidget" name="page_global_parameters">
         <attribute name="title">
          <string>全局参数</string>
         </attribute>
-        <widget class="QWidget" name="horizontalLayoutWidget">
+        <widget class="QWidget" name="row_global_run_mode">
          <property name="geometry">
           <rect>
            <x>0</x>
@@ -138,7 +138,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QLabel" name="label">
+           <widget class="QLabel" name="label_run_mode">
             <property name="enabled">
              <bool>true</bool>
             </property>
@@ -154,7 +154,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="Runmode">
+           <widget class="QComboBox" name="combo_run_mode">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -211,7 +211,7 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="horizontalLayoutWidget_2">
+        <widget class="QWidget" name="row_global_integration_center">
          <property name="geometry">
           <rect>
            <x>0</x>
@@ -238,7 +238,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QLabel" name="label_2">
+           <widget class="QLabel" name="label_integration_center">
             <property name="enabled">
              <bool>true</bool>
             </property>
@@ -254,7 +254,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="Runmode_2">
+           <widget class="QComboBox" name="combo_integration_center">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -301,7 +301,7 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="horizontalLayoutWidget_3">
+        <widget class="QWidget" name="row_global_central_gravity">
          <property name="geometry">
           <rect>
            <x>0</x>
@@ -328,7 +328,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QLabel" name="label_3">
+           <widget class="QLabel" name="label_central_gravity_field">
             <property name="enabled">
              <bool>true</bool>
             </property>
@@ -344,7 +344,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="ForceCent">
+           <widget class="QCheckBox" name="check_central_gravity_field">
             <property name="text">
              <string>计算</string>
             </property>
@@ -368,7 +368,7 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="horizontalLayoutWidget_4">
+        <widget class="QWidget" name="row_global_gravity_field">
          <property name="geometry">
           <rect>
            <x>0</x>
@@ -395,7 +395,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QLabel" name="label_4">
+           <widget class="QLabel" name="label_gravity_file_format">
             <property name="enabled">
              <bool>true</bool>
             </property>
@@ -411,7 +411,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="comboBox">
+           <widget class="QComboBox" name="combo_gravity_file_format">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -452,7 +452,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QLabel" name="label_5">
+           <widget class="QLabel" name="label_gravity_degree">
             <property name="enabled">
              <bool>true</bool>
             </property>
@@ -468,7 +468,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox">
+           <widget class="QSpinBox" name="spin_gravity_degree">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -500,7 +500,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QLabel" name="label_6">
+           <widget class="QLabel" name="label_gravity_inversion_degree">
             <property name="enabled">
              <bool>true</bool>
             </property>
@@ -516,7 +516,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_2">
+           <widget class="QSpinBox" name="spin_gravity_inversion_degree">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -533,7 +533,7 @@
           </item>
          </layout>
         </widget>
-        <widget class="Line" name="line">
+        <widget class="Line" name="separator_global_run_mode">
          <property name="geometry">
           <rect>
            <x>0</x>
@@ -546,7 +546,7 @@
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
-        <widget class="Line" name="line_2">
+        <widget class="Line" name="separator_global_integration_center">
          <property name="geometry">
           <rect>
            <x>0</x>
@@ -559,7 +559,7 @@
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
-        <widget class="Line" name="line_3">
+        <widget class="Line" name="separator_global_gravity_field">
          <property name="geometry">
           <rect>
            <x>0</x>
@@ -572,7 +572,7 @@
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
-        <widget class="QWidget" name="horizontalLayoutWidget_5">
+        <widget class="QWidget" name="row_global_third_body_ephemeris">
          <property name="geometry">
           <rect>
            <x>0</x>
@@ -599,7 +599,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QLabel" name="label_7">
+           <widget class="QLabel" name="label_third_body_ephemeris">
             <property name="enabled">
              <bool>true</bool>
             </property>
@@ -615,7 +615,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="ForceCent_2">
+           <widget class="QCheckBox" name="check_third_body_mercury">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -628,7 +628,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="ForceCent_3">
+           <widget class="QCheckBox" name="check_third_body_venus">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -641,7 +641,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="ForceCent_4">
+           <widget class="QCheckBox" name="check_third_body_earth">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -654,7 +654,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="ForceCent_5">
+           <widget class="QCheckBox" name="check_third_body_mars">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -667,7 +667,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="ForceCent_6">
+           <widget class="QCheckBox" name="check_third_body_jupiter">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -680,7 +680,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="ForceCent_7">
+           <widget class="QCheckBox" name="check_third_body_uranus">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -693,7 +693,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="ForceCent_8">
+           <widget class="QCheckBox" name="check_third_body_neptune">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -706,7 +706,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="ForceCent_9">
+           <widget class="QCheckBox" name="check_third_body_pluto">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -719,7 +719,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="ForceCent_10">
+           <widget class="QCheckBox" name="check_third_body_moon">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -732,7 +732,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="ForceCent_11">
+           <widget class="QCheckBox" name="check_third_body_sun">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -761,7 +761,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QComboBox" name="comboBox_2">
+           <widget class="QComboBox" name="combo_ephemeris_model">
             <item>
              <property name="text">
               <string>DE405</string>
@@ -781,7 +781,7 @@
           </item>
          </layout>
         </widget>
-        <widget class="Line" name="line_4">
+        <widget class="Line" name="separator_global_third_body">
          <property name="geometry">
           <rect>
            <x>0</x>
@@ -795,7 +795,7 @@
          </property>
         </widget>
        </widget>
-       <widget class="QWidget" name="tab_2">
+       <widget class="QWidget" name="page_arc_parameters">
         <attribute name="title">
          <string>弧段参数</string>
         </attribute>
@@ -840,7 +840,7 @@
      <pointsize>8</pointsize>
     </font>
    </property>
-   <widget class="QMenu" name="menu">
+   <widget class="QMenu" name="menu_file">
     <property name="font">
      <font>
       <family>宋体</family>
@@ -852,12 +852,12 @@
     <property name="title">
      <string>文件(F)</string>
     </property>
-    <addaction name="action1"/>
-    <addaction name="action1_2"/>
-    <addaction name="action2"/>
-    <addaction name="action3"/>
+    <addaction name="action_new_scheme"/>
+    <addaction name="action_open_scheme"/>
+    <addaction name="action_save_scheme"/>
+    <addaction name="action_save_scheme_as"/>
    </widget>
-   <widget class="QMenu" name="menu_C">
+   <widget class="QMenu" name="menu_card">
     <property name="font">
      <font>
       <family>宋体</family>
@@ -867,12 +867,12 @@
     <property name="title">
      <string>卡片(C)</string>
     </property>
-    <addaction name="action1_3"/>
-    <addaction name="action2_2"/>
-    <addaction name="action3_2"/>
-    <addaction name="action4"/>
+    <addaction name="action_import_gcp_card"/>
+    <addaction name="action_import_lcp_card"/>
+    <addaction name="action_import_simcp_card"/>
+    <addaction name="action_import_stacp_card"/>
    </widget>
-   <widget class="QMenu" name="menu_D">
+   <widget class="QMenu" name="menu_orbit">
     <property name="font">
      <font>
       <family>宋体</family>
@@ -882,10 +882,10 @@
     <property name="title">
      <string>定轨(D)</string>
     </property>
-    <addaction name="action1_4"/>
-    <addaction name="actiond"/>
+    <addaction name="action_start_orbit"/>
+    <addaction name="action_show_chart"/>
    </widget>
-   <widget class="QMenu" name="menu_2">
+   <widget class="QMenu" name="menu_about">
     <property name="font">
      <font>
       <family>宋体</family>
@@ -895,15 +895,15 @@
     <property name="title">
      <string>关于(A)</string>
     </property>
-    <addaction name="actiona"/>
+    <addaction name="action_show_about"/>
    </widget>
-   <addaction name="menu"/>
-   <addaction name="menu_C"/>
-   <addaction name="menu_D"/>
-   <addaction name="menu_2"/>
+   <addaction name="menu_file"/>
+   <addaction name="menu_card"/>
+   <addaction name="menu_orbit"/>
+   <addaction name="menu_about"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="action1">
+  <action name="action_new_scheme">
    <property name="text">
     <string>新建定轨方案(N)</string>
    </property>
@@ -914,7 +914,7 @@
     </font>
    </property>
   </action>
-  <action name="action1_2">
+  <action name="action_open_scheme">
    <property name="text">
     <string>打开定轨方案(O)</string>
    </property>
@@ -925,7 +925,7 @@
     </font>
    </property>
   </action>
-  <action name="action2">
+  <action name="action_save_scheme">
    <property name="text">
     <string>保存定轨方案(S)</string>
    </property>
@@ -935,7 +935,7 @@
     </font>
    </property>
   </action>
-  <action name="action3">
+  <action name="action_save_scheme_as">
    <property name="text">
     <string>另存定轨方案(A)</string>
    </property>
@@ -945,37 +945,37 @@
     </font>
    </property>
   </action>
-  <action name="action1_3">
+  <action name="action_import_gcp_card">
    <property name="text">
     <string>导入全局参数卡片GCP</string>
    </property>
   </action>
-  <action name="action2_2">
+  <action name="action_import_lcp_card">
    <property name="text">
     <string>导入弧段参数卡片LCP</string>
    </property>
   </action>
-  <action name="action3_2">
+  <action name="action_import_simcp_card">
    <property name="text">
     <string>导入模拟观测值卡片SimCP</string>
    </property>
   </action>
-  <action name="action4">
+  <action name="action_import_stacp_card">
    <property name="text">
     <string>导入测站参数卡片GCP</string>
    </property>
   </action>
-  <action name="action1_4">
+  <action name="action_start_orbit">
    <property name="text">
     <string>开始定轨(B)</string>
    </property>
   </action>
-  <action name="actiond">
+  <action name="action_show_chart">
    <property name="text">
     <string>查看图标(G)</string>
    </property>
   </action>
-  <action name="actiona">
+  <action name="action_show_about">
    <property name="text">
     <string>版本信息(V)</string>
    </property>

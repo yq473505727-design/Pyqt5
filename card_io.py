@@ -96,30 +96,30 @@ STATION_BODY_INFO = {
 
 
 PLANETS = [
-    ("Mercury", 1, "ForceCent_2", "lineEdit"),
-    ("Venus", 2, "ForceCent_3", "lineEdit_3"),
-    ("Earth", 399, "ForceCent_4", "lineEdit_5"),
-    ("Mars", 4, "ForceCent_5", "lineEdit_7"),
-    ("Jupiter", 5, "ForceCent_6", "lineEdit_9"),
-    ("Uranus", 7, "ForceCent_7", "lineEdit_13"),
-    ("Neptune", 8, "ForceCent_8", "lineEdit_15"),
-    ("Pluto", 9, "ForceCent_9", "lineEdit_17"),
-    ("Lunar", 301, "ForceCent_10", "lineEdit_19"),
-    ("Sun", 10, "ForceCent_11", "lineEdit_21"),
+    ("Mercury", 1, "check_third_body_mercury", "edit_mercury_gm"),
+    ("Venus", 2, "check_third_body_venus", "edit_venus_gm"),
+    ("Earth", 399, "check_third_body_earth", "edit_earth_gm"),
+    ("Mars", 4, "check_third_body_mars", "edit_mars_gm"),
+    ("Jupiter", 5, "check_third_body_jupiter", "edit_jupiter_gm"),
+    ("Uranus", 7, "check_third_body_uranus", "edit_uranus_gm"),
+    ("Neptune", 8, "check_third_body_neptune", "edit_neptune_gm"),
+    ("Pluto", 9, "check_third_body_pluto", "edit_pluto_gm"),
+    ("Lunar", 301, "check_third_body_moon", "edit_moon_gm"),
+    ("Sun", 10, "check_third_body_sun", "edit_sun_gm"),
 ]
 
 PLANET_CARD_ROWS = [
-    ("Mercury", "ForceCent_2", "lineEdit", "lineEdit_2"),
-    ("Venus", "ForceCent_3", "lineEdit_3", "lineEdit_4"),
-    ("Earth", "ForceCent_4", "lineEdit_5", "lineEdit_6"),
-    ("Mars", "ForceCent_5", "lineEdit_7", "lineEdit_8"),
-    ("Jupiter", "ForceCent_6", "lineEdit_9", "lineEdit_10"),
-    ("Saturn", None, "lineEdit_11", "lineEdit_12"),
-    ("Uranus", "ForceCent_7", "lineEdit_13", "lineEdit_14"),
-    ("Neptune", "ForceCent_8", "lineEdit_15", "lineEdit_16"),
-    ("Pluto", "ForceCent_9", "lineEdit_17", "lineEdit_18"),
-    ("Lunar", "ForceCent_10", "lineEdit_19", "lineEdit_20"),
-    ("Sun", "ForceCent_11", "lineEdit_21", "lineEdit_22"),
+    ("Mercury", "check_third_body_mercury", "edit_mercury_gm", "edit_mercury_radius"),
+    ("Venus", "check_third_body_venus", "edit_venus_gm", "edit_venus_radius"),
+    ("Earth", "check_third_body_earth", "edit_earth_gm", "edit_earth_radius"),
+    ("Mars", "check_third_body_mars", "edit_mars_gm", "edit_mars_radius"),
+    ("Jupiter", "check_third_body_jupiter", "edit_jupiter_gm", "edit_jupiter_radius"),
+    ("Saturn", None, "edit_saturn_gm", "edit_saturn_radius"),
+    ("Uranus", "check_third_body_uranus", "edit_uranus_gm", "edit_uranus_radius"),
+    ("Neptune", "check_third_body_neptune", "edit_neptune_gm", "edit_neptune_radius"),
+    ("Pluto", "check_third_body_pluto", "edit_pluto_gm", "edit_pluto_radius"),
+    ("Lunar", "check_third_body_moon", "edit_moon_gm", "edit_moon_radius"),
+    ("Sun", "check_third_body_sun", "edit_sun_gm", "edit_sun_radius"),
 ]
 
 #_read_text 支持自动识别编码，并兼容 utf-8、gbk、gb18030，降低中文卡片读取乱码风险
@@ -584,28 +584,28 @@ def _simcp_station_fields(table: QTableWidget, row: int) -> str:
 def save_gcp(ui, save_path: str | Path) -> None:
     """从界面控件收集全局参数并保存为 GCP 控制卡片。"""
     lines = _comment_header("GCP 全局参数卡片")
-    lines.append(f"RunMode   {_combo_code(ui.Runmode, RUNMODE_TO_CODE, '4')}      1")
-    lines.append(f"Integcent {_combo_code(ui.Runmode_2, INTEGCENT_TO_CODE, '0')}")
-    lines.append(f"ForceCent {int(ui.ForceCent.isChecked())}         {_combo_code(ui.comboBox, FILETYPE_TO_CODE, '1')}")
-    lines.append(f"ForceNS   {ui.spinBox.value()}")
-    lines.append(f"ForceNB   {_force_nb_mask(ui)}     {_combo_code(ui.comboBox_2, DE_TO_CODE, '440')}")
+    lines.append(f"RunMode   {_combo_code(ui.combo_run_mode, RUNMODE_TO_CODE, '4')}      1")
+    lines.append(f"Integcent {_combo_code(ui.combo_integration_center, INTEGCENT_TO_CODE, '0')}")
+    lines.append(f"ForceCent {int(ui.check_central_gravity_field.isChecked())}         {_combo_code(ui.combo_gravity_file_format, FILETYPE_TO_CODE, '1')}")
+    lines.append(f"ForceNS   {ui.spin_gravity_degree.value()}")
+    lines.append(f"ForceNB   {_force_nb_mask(ui)}     {_combo_code(ui.combo_ephemeris_model, DE_TO_CODE, '440')}")
     lines.append("#")
     for name, _, gm_edit_name, radius_edit_name in PLANET_CARD_ROWS:
         gm = getattr(ui, gm_edit_name).text().strip()
         radius = getattr(ui, radius_edit_name).text().strip()
         lines.append(f"{name:<12}{gm:<30}{radius}")
-    lines.append(f"ForceRL   {int(ui.ForceCent_12.isChecked())}")
-    lines.append(f"ForceST   {int(ui.ForceCent_14.isChecked())}")
+    lines.append(f"ForceRL   {int(ui.check_relativity_perturbation.isChecked())}")
+    lines.append(f"ForceST   {int(ui.check_solid_tide_perturbation.isChecked())}")
     lines.append("H2LOVE                  0.6090")
     lines.append("L2LOVE                  0.0852")
-    lines.append(f"K2LOVE              {ui.lineEdit_23.text().strip():<20}        {ui.lineEdit_24.text().strip()}")
-    lines.append(f"ForceSR   {int(ui.ForceCent_13.isChecked())}         {_combo_code(ui.comboBox_3, SR_MODEL_TO_CODE, '2')}")
+    lines.append(f"K2LOVE              {ui.edit_solid_tide_k2_love_number.text().strip():<20}        {ui.edit_solid_tide_prior_error.text().strip()}")
+    lines.append(f"ForceSR   {int(ui.check_solar_radiation_pressure.isChecked())}         {_combo_code(ui.combo_solar_pressure_model, SR_MODEL_TO_CODE, '2')}")
     lines.append("ForceEJ2  0")
     lines.append("PrintOut  1000000000")
-    lines.append(f"TropoCorr {int(ui.ForceCent_15.isChecked())}         {_combo_code(ui.comboBox_4, TROPO_TO_CODE, '1')}")
+    lines.append(f"TropoCorr {int(ui.check_troposphere_delay.isChecked())}         {_combo_code(ui.combo_troposphere_model, TROPO_TO_CODE, '1')}")
     lines.append("MeaParFil 1         1")
     lines.append("CompG2E   1")
-    lines.append(f"IntegType {_combo_code(ui.comboBox_6, INTEGRATOR_TO_CODE, '2')}")
+    lines.append(f"IntegType {_combo_code(ui.combo_integrator_type, INTEGRATOR_TO_CODE, '2')}")
     lines.append("PreNut    0")
     _write_lines(save_path, lines)
 
@@ -622,24 +622,24 @@ def read_gcp(path: str | Path, ui) -> None:
             continue
         key = parts[0]
         if key == "RunMode" and len(parts) > 1:
-            _set_combo(ui.Runmode, CODE_TO_RUNMODE.get(parts[1], ui.Runmode.currentText()))
+            _set_combo(ui.combo_run_mode, CODE_TO_RUNMODE.get(parts[1], ui.combo_run_mode.currentText()))
         elif key == "Integcent" and len(parts) > 1:
-            _set_combo_by_code(ui.Runmode_2, parts[1], CODE_TO_INTEGCENT)
+            _set_combo_by_code(ui.combo_integration_center, parts[1], CODE_TO_INTEGCENT)
         elif key in ("ChooseInt", "IntegType") and len(parts) > 1:
             if parts[1] in CODE_TO_INTEGRATOR:
-                _set_combo(ui.comboBox_6, CODE_TO_INTEGRATOR[parts[1]])
+                _set_combo(ui.combo_integrator_type, CODE_TO_INTEGRATOR[parts[1]])
         elif key == "ForceCent":
             if len(parts) > 1:
-                ui.ForceCent.setChecked(parts[1] == "1")
+                ui.check_central_gravity_field.setChecked(parts[1] == "1")
             if len(parts) > 2:
-                _set_combo(ui.comboBox, CODE_TO_FILETYPE.get(parts[2], ui.comboBox.currentText()))
+                _set_combo(ui.combo_gravity_file_format, CODE_TO_FILETYPE.get(parts[2], ui.combo_gravity_file_format.currentText()))
         elif key == "ForceNS" and len(parts) > 1:
-            ui.spinBox.setValue(int(float(parts[1])))
+            ui.spin_gravity_degree.setValue(int(float(parts[1])))
         elif key == "SolveNS" and len(parts) > 1:
-            ui.spinBox_2.setValue(int(float(parts[1])))
+            ui.spin_gravity_inversion_degree.setValue(int(float(parts[1])))
         elif key == "ForceNB":
             if len(parts) > 2:
-                _set_combo_by_code(ui.comboBox_2, parts[2], CODE_TO_DE)
+                _set_combo_by_code(ui.combo_ephemeris_model, parts[2], CODE_TO_DE)
             if len(parts) > 1 and re.fullmatch(r"[01]+", parts[1]):
                 mask = parts[1]
                 for index, (_, checkbox_name, _, _) in enumerate(PLANET_CARD_ROWS):
@@ -658,24 +658,24 @@ def read_gcp(path: str | Path, ui) -> None:
                         getattr(ui, checkbox_name).setChecked(p[3] == "1")
                 i += 1
         elif key == "ForceRL" and len(parts) > 1:
-            ui.ForceCent_12.setChecked(parts[1] == "1")
+            ui.check_relativity_perturbation.setChecked(parts[1] == "1")
         elif key == "ForceSR":
             if len(parts) > 1:
-                ui.ForceCent_13.setChecked(parts[1] == "1")
+                ui.check_solar_radiation_pressure.setChecked(parts[1] == "1")
             if len(parts) > 2:
-                _set_combo(ui.comboBox_3, CODE_TO_SR_MODEL.get(parts[2], ui.comboBox_3.currentText()))
+                _set_combo(ui.combo_solar_pressure_model, CODE_TO_SR_MODEL.get(parts[2], ui.combo_solar_pressure_model.currentText()))
         elif key == "ForceST" and len(parts) > 1:
-            ui.ForceCent_14.setChecked(parts[1] == "1")
+            ui.check_solid_tide_perturbation.setChecked(parts[1] == "1")
         elif key == "K2LOVE":
             if len(parts) > 1:
-                ui.lineEdit_23.setText(parts[1])
+                ui.edit_solid_tide_k2_love_number.setText(parts[1])
             if len(parts) > 2:
-                ui.lineEdit_24.setText(parts[2])
+                ui.edit_solid_tide_prior_error.setText(parts[2])
         elif key == "TropoCorr":
             if len(parts) > 1:
-                ui.ForceCent_15.setChecked(parts[1] == "1")
+                ui.check_troposphere_delay.setChecked(parts[1] == "1")
             if len(parts) > 2:
-                _set_combo(ui.comboBox_4, CODE_TO_TROPO.get(parts[2], ui.comboBox_4.currentText()))
+                _set_combo(ui.combo_troposphere_model, CODE_TO_TROPO.get(parts[2], ui.combo_troposphere_model.currentText()))
         elif key in {name for name, _, _, _ in PLANET_CARD_ROWS}:
             by_name = {name: (gm_edit, radius_edit) for name, _, gm_edit, radius_edit in PLANET_CARD_ROWS}
             gm_edit_name, radius_edit_name = by_name[key]
@@ -690,79 +690,79 @@ def save_lcp(ui, save_path: str | Path) -> None:
     """从界面控件收集弧段参数、观测权重和解算设置并保存为 LCP。"""
     lines = _comment_header("LCP 弧段参数卡片")
     lines.append("RefSys    1")
-    lines.append(f"SatID      {ui.lineEdit_25.text().strip()}")
-    lines.append(f"SatMsAr    {ui.lineEdit_27.text().strip() or '0'}         {ui.lineEdit_29.text().strip() or '0'}")
-    lines.append(f"SatSoCr    {ui.lineEdit_30.text().strip() or '0'}         {ui.lineEdit_31.text().strip() or '0'}        1    0.0   2")
-    lines.append(f"StartTime {_datetime_edit_card_text(ui.dateTimeEdit)}")
-    lines.append(f"EndTime   {_datetime_edit_card_text(ui.dateTimeEdit_2)}")
-    if ui.comboBox_5.currentText() == "开普勒轨道根数":
-        lines.append(f"OrbRootP1    {ui.lineEdit_32.text().strip() or '0 0 0'}")
-        lines.append(f"OrbRootV1    {ui.lineEdit_33.text().strip() or '0 0 0'}")
+    lines.append(f"SatID      {ui.edit_arc_satellite_id.text().strip()}")
+    lines.append(f"SatMsAr    {ui.edit_arc_satellite_mass.text().strip() or '0'}         {ui.edit_arc_body_area.text().strip() or '0'}")
+    lines.append(f"SatSoCr    {ui.edit_arc_solar_pressure_coefficient.text().strip() or '0'}         {ui.edit_arc_solar_pressure_prior_error.text().strip() or '0'}        1    0.0   2")
+    lines.append(f"StartTime {_datetime_edit_card_text(ui.date_arc_start_time)}")
+    lines.append(f"EndTime   {_datetime_edit_card_text(ui.date_arc_end_time)}")
+    if ui.combo_arc_initial_orbit_type.currentText() == "开普勒轨道根数":
+        lines.append(f"OrbRootP1    {ui.edit_arc_initial_position.text().strip() or '0 0 0'}")
+        lines.append(f"OrbRootV1    {ui.edit_arc_initial_velocity.text().strip() or '0 0 0'}")
     else:
-        lines.append(f"OrbRootP0    {ui.lineEdit_32.text().strip() or '0 0 0'}")
-        lines.append(f"OrbRootV0    {ui.lineEdit_33.text().strip() or '0 0 0'}")
-    lines.append(f"OrbVARCOV1  {ui.lineEdit_34.text().strip() or '0 0 0'}")
-    lines.append(f"OrbVARCOV2  {ui.lineEdit_35.text().strip() or '0 0 0'}")
-    lines.append(f"IntegStep  {_step_text(ui, 'comboBox_integ_step', 'lineEdit_38', '60')}")
-    lines.append(f"PrintStep  {_step_text(ui, 'comboBox_print_step', 'lineEdit_39', '60')}")
+        lines.append(f"OrbRootP0    {ui.edit_arc_initial_position.text().strip() or '0 0 0'}")
+        lines.append(f"OrbRootV0    {ui.edit_arc_initial_velocity.text().strip() or '0 0 0'}")
+    lines.append(f"OrbVARCOV1  {ui.edit_arc_position_prior.text().strip() or '0 0 0'}")
+    lines.append(f"OrbVARCOV2  {ui.edit_arc_velocity_prior.text().strip() or '0 0 0'}")
+    lines.append(f"IntegStep  {_step_text(ui, 'combo_arc_integration_step', 'edit_arc_integration_step_legacy', '60')}")
+    lines.append(f"PrintStep  {_step_text(ui, 'combo_arc_output_step', 'edit_arc_output_step_legacy', '60')}")
     lines.append("EPS_DX        100.0")
 
-    for row in _nonempty_rows(ui.tableWidget_2):
-        obs_code = _observation_type_code(_item_text(ui.tableWidget_2, row, 0))
-        lines.append(f"SIGMA         {obs_code}           {_item_text(ui.tableWidget_2, row, 1)}")
-    for row in _nonempty_rows(ui.tableWidget_4):
-        lines.append(f"PBIAS     {_item_text(ui.tableWidget_4, row, 0)} {_item_text(ui.tableWidget_4, row, 1)} {_item_text(ui.tableWidget_4, row, 2)}")
-    for row in _nonempty_rows(ui.tableWidget_5):
+    for row in _nonempty_rows(ui.table_arc_observation_weight):
+        obs_code = _observation_type_code(_item_text(ui.table_arc_observation_weight, row, 0))
+        lines.append(f"SIGMA         {obs_code}           {_item_text(ui.table_arc_observation_weight, row, 1)}")
+    for row in _nonempty_rows(ui.table_arc_measurement_bias):
+        lines.append(f"PBIAS     {_item_text(ui.table_arc_measurement_bias, row, 0)} {_item_text(ui.table_arc_measurement_bias, row, 1)} {_item_text(ui.table_arc_measurement_bias, row, 2)}")
+    for row in _nonempty_rows(ui.table_arc_fixed_measurement_bias):
         obs_bias_id = _obs_bias_identifier(
-            _item_text(ui.tableWidget_5, row, 0),
-            _item_text(ui.tableWidget_5, row, 1, "001"),
-            _item_text(ui.tableWidget_5, row, 2, "001"),
+            _item_text(ui.table_arc_fixed_measurement_bias, row, 0),
+            _item_text(ui.table_arc_fixed_measurement_bias, row, 1, "001"),
+            _item_text(ui.table_arc_fixed_measurement_bias, row, 2, "001"),
         )
         lines.append(
             "ObsBias   "
-            f"{obs_bias_id} {_item_text(ui.tableWidget_5, row, 3)} "
-            f"{datetime_cell(ui.tableWidget_5, row, 4, 'yyyyMMddHHmmss.zzz')} "
-            f"{datetime_cell(ui.tableWidget_5, row, 5, 'yyyyMMddHHmmss.zzz')} "
-            f"{_item_text(ui.tableWidget_5, row, 6)}"
+            f"{obs_bias_id} {_item_text(ui.table_arc_fixed_measurement_bias, row, 3)} "
+            f"{datetime_cell(ui.table_arc_fixed_measurement_bias, row, 4, 'yyyyMMddHHmmss.zzz')} "
+            f"{datetime_cell(ui.table_arc_fixed_measurement_bias, row, 5, 'yyyyMMddHHmmss.zzz')} "
+            f"{_item_text(ui.table_arc_fixed_measurement_bias, row, 6)}"
         )
-    for row in _nonempty_rows(ui.tableWidget_6):
+    for row in _nonempty_rows(ui.table_arc_select_observation):
         satellite_1 = _combine_select_satellite_1(
-            _item_text(ui.tableWidget_6, row, 3),
-            _item_text(ui.tableWidget_6, row, 4, "0000000"),
+            _item_text(ui.table_arc_select_observation, row, 3),
+            _item_text(ui.table_arc_select_observation, row, 4, "0000000"),
         )
         lines.append(
             "SelectObs "
-            f"{_select_observation_type_code(_item_text(ui.tableWidget_6, row, 0))} "
-            f"{_item_text(ui.tableWidget_6, row, 1)} "
-            f"{_item_text(ui.tableWidget_6, row, 2)} {satellite_1} "
-            f"{_item_text(ui.tableWidget_6, row, 5, '0000000')} "
-            f"{_compact_card_datetime(ui.tableWidget_6, row, 6)} "
-            f"{_compact_card_datetime(ui.tableWidget_6, row, 7)}"
+            f"{_select_observation_type_code(_item_text(ui.table_arc_select_observation, row, 0))} "
+            f"{_item_text(ui.table_arc_select_observation, row, 1)} "
+            f"{_item_text(ui.table_arc_select_observation, row, 2)} {satellite_1} "
+            f"{_item_text(ui.table_arc_select_observation, row, 5, '0000000')} "
+            f"{_compact_card_datetime(ui.table_arc_select_observation, row, 6)} "
+            f"{_compact_card_datetime(ui.table_arc_select_observation, row, 7)}"
         )
-    for row in _nonempty_rows(ui.tableWidget_7):
+    for row in _nonempty_rows(ui.table_arc_delete_observation):
         lines.append(
             "Discard   "
-            f"{_item_text(ui.tableWidget_7, row, 0)} {_item_text(ui.tableWidget_7, row, 1)} "
-            f"{_item_text(ui.tableWidget_7, row, 2)} {_item_text(ui.tableWidget_7, row, 3, '0000000')} "
-            f"{_item_text(ui.tableWidget_7, row, 4, '0000000')} "
-            f"{datetime_cell(ui.tableWidget_7, row, 5, 'yyyyMMddHHmmss.zzz')} "
-            f"{datetime_cell(ui.tableWidget_7, row, 6, 'yyyyMMddHHmmss.zzz')}"
+            f"{_item_text(ui.table_arc_delete_observation, row, 0)} {_item_text(ui.table_arc_delete_observation, row, 1)} "
+            f"{_item_text(ui.table_arc_delete_observation, row, 2)} {_item_text(ui.table_arc_delete_observation, row, 3, '0000000')} "
+            f"{_item_text(ui.table_arc_delete_observation, row, 4, '0000000')} "
+            f"{datetime_cell(ui.table_arc_delete_observation, row, 5, 'yyyyMMddHHmmss.zzz')} "
+            f"{datetime_cell(ui.table_arc_delete_observation, row, 6, 'yyyyMMddHHmmss.zzz')}"
         )
-    lines.append(f"PerAccNum   {ui.spinBox_3.value()} {ui.comboBox_8.currentIndex()}")
-    for row in _nonempty_rows(ui.tableWidget_8):
+    lines.append(f"PerAccNum   {ui.spin_arc_per_acc_count.value()} {ui.combo_arc_per_acc_model_type.currentIndex()}")
+    for row in _nonempty_rows(ui.table_arc_per_acc_period):
         lines.append(
             "PerAccinf   "
-            f"{_item_text(ui.tableWidget_8, row, 0)} "
-            f"{datetime_cell(ui.tableWidget_8, row, 1, 'yyyyMMddHHmmss.zzz')} "
-            f"{datetime_cell(ui.tableWidget_8, row, 2, 'yyyyMMddHHmmss.zzz')} "
-            f"{_item_text(ui.tableWidget_8, row, 3, 'TDB')}"
+            f"{_item_text(ui.table_arc_per_acc_period, row, 0)} "
+            f"{datetime_cell(ui.table_arc_per_acc_period, row, 1, 'yyyyMMddHHmmss.zzz')} "
+            f"{datetime_cell(ui.table_arc_per_acc_period, row, 2, 'yyyyMMddHHmmss.zzz')} "
+            f"{_item_text(ui.table_arc_per_acc_period, row, 3, 'TDB')}"
         )
-    for row in _nonempty_rows(ui.tableWidget_16):
+    for row in _nonempty_rows(ui.table_arc_per_acc_model):
         lines.append(
             "PerAcc    "
-            f"{_coded_value(_item_text(ui.tableWidget_16, row, 0), PER_ACC_DIRECTION_INFO)} "
-            f"{_coded_value(_item_text(ui.tableWidget_16, row, 1), PER_ACC_MODEL_INFO)} "
-            f"{_item_text(ui.tableWidget_16, row, 2)} {_item_text(ui.tableWidget_16, row, 3)}"
+            f"{_coded_value(_item_text(ui.table_arc_per_acc_model, row, 0), PER_ACC_DIRECTION_INFO)} "
+            f"{_coded_value(_item_text(ui.table_arc_per_acc_model, row, 1), PER_ACC_MODEL_INFO)} "
+            f"{_item_text(ui.table_arc_per_acc_model, row, 2)} {_item_text(ui.table_arc_per_acc_model, row, 3)}"
         )
     lines.append("PrintStat 0000000000")
     lines.append("Residu    1")
@@ -772,13 +772,13 @@ def save_lcp(ui, save_path: str | Path) -> None:
 def read_lcp(path: str | Path, ui) -> None:
     """读取 LCP 弧段参数卡片并恢复轨道、观测和经验加速度表格。"""
     _clear_table_rows(
-        ui.tableWidget_2,
-        ui.tableWidget_4,
-        ui.tableWidget_5,
-        ui.tableWidget_6,
-        ui.tableWidget_7,
-        ui.tableWidget_8,
-        ui.tableWidget_16,
+        ui.table_arc_observation_weight,
+        ui.table_arc_measurement_bias,
+        ui.table_arc_fixed_measurement_bias,
+        ui.table_arc_select_observation,
+        ui.table_arc_delete_observation,
+        ui.table_arc_per_acc_period,
+        ui.table_arc_per_acc_model,
     )
     for line in _clean_lines(path):
         parts = line.split()
@@ -788,54 +788,54 @@ def read_lcp(path: str | Path, ui) -> None:
         values = parts[1:]
         value_text = " ".join(values)
         if key == "SatID" and values:
-            ui.lineEdit_25.setText(values[0])
+            ui.edit_arc_satellite_id.setText(values[0])
         elif key == "SatMsAr":
             if len(values) > 0:
-                ui.lineEdit_27.setText(values[0])
+                ui.edit_arc_satellite_mass.setText(values[0])
             if len(values) > 1:
-                ui.lineEdit_29.setText(values[1])
+                ui.edit_arc_body_area.setText(values[1])
         elif key == "SatPanel" and values:
-            ui.lineEdit_28.setText(values[0])
+            ui.edit_arc_solar_panel_area.setText(values[0])
         elif key == "SatSoCr":
             if len(values) > 0:
-                ui.lineEdit_30.setText(values[0])
+                ui.edit_arc_solar_pressure_coefficient.setText(values[0])
             if len(values) > 1:
-                ui.lineEdit_31.setText(values[1])
+                ui.edit_arc_solar_pressure_prior_error.setText(values[1])
         elif key == "StartTime":
-            ui.dateTimeEdit.setDateTime(parse_datetime(value_text))
+            ui.date_arc_start_time.setDateTime(parse_datetime(value_text))
         elif key == "EndTime":
-            ui.dateTimeEdit_2.setDateTime(parse_datetime(value_text))
+            ui.date_arc_end_time.setDateTime(parse_datetime(value_text))
         elif key in ("OrbRootP0", "OrbRootP1"):
-            _set_combo(ui.comboBox_5, "开普勒轨道根数" if key.endswith("1") else "直角坐标系")
-            ui.lineEdit_32.setText(value_text)
+            _set_combo(ui.combo_arc_initial_orbit_type, "开普勒轨道根数" if key.endswith("1") else "直角坐标系")
+            ui.edit_arc_initial_position.setText(value_text)
         elif key in ("OrbRootV0", "OrbRootV1"):
-            ui.lineEdit_33.setText(value_text)
+            ui.edit_arc_initial_velocity.setText(value_text)
         elif key == "OrbVARCOV1":
-            ui.lineEdit_34.setText(orbit_prior_values(values))
+            ui.edit_arc_position_prior.setText(orbit_prior_values(values))
         elif key == "OrbVARCOV2":
-            ui.lineEdit_35.setText(orbit_prior_values(values))
+            ui.edit_arc_velocity_prior.setText(orbit_prior_values(values))
         elif key == "DopWindow" and values:
-            ui.lineEdit_36.setText(values[0])
+            ui.edit_arc_doppler_integration_time.setText(values[0])
         elif key == "DopInvTime" and values:
-            ui.lineEdit_37.setText(values[0])
+            ui.edit_arc_doppler_inverse_time.setText(values[0])
         elif key == "IntegStep" and values:
-            _set_step_text(ui, "comboBox_integ_step", "lineEdit_38", values[0])
+            _set_step_text(ui, "combo_arc_integration_step", "edit_arc_integration_step_legacy", values[0])
         elif key == "PrintStep" and values:
-            _set_step_text(ui, "comboBox_print_step", "lineEdit_39", values[0])
+            _set_step_text(ui, "combo_arc_output_step", "edit_arc_output_step_legacy", values[0])
         elif key == "ChooseInt" and values:
             if values[0] in CODE_TO_INTEGRATOR:
-                _set_combo(ui.comboBox_6, CODE_TO_INTEGRATOR[values[0]])
+                _set_combo(ui.combo_integrator_type, CODE_TO_INTEGRATOR[values[0]])
         elif key == "ParDeriv" and values:
-            ui.lineEdit_40.setText(values[0])
+            ui.edit_arc_partial_derivative_step.setText(values[0])
         elif key.lower() == "orbderiv":
             if len(values) > 0:
-                ui.lineEdit_41.setText(values[0])
+                ui.edit_arc_position_derivative_step.setText(values[0])
             if len(values) > 1:
-                ui.lineEdit_42.setText(values[1])
+                ui.edit_arc_velocity_derivative_step.setText(values[1])
         elif key == "InputFilt" and values:
             idx = int(float(values[0]))
-            if 0 <= idx < ui.comboBox_7.count():
-                ui.comboBox_7.setCurrentIndex(idx)
+            if 0 <= idx < ui.combo_arc_input_filter.count():
+                ui.combo_arc_input_filter.setCurrentIndex(idx)
         elif key == "SIGMA":
             obs_code = values[0] if values else ""
             row_values = [
@@ -843,16 +843,16 @@ def read_lcp(path: str | Path, ui) -> None:
                 values[1] if len(values) > 1 else "",
                 _observation_type_unit(obs_code, values[2] if len(values) > 2 else ""),
             ]
-            _append_plain_row(ui.tableWidget_2, row_values)
+            _append_plain_row(ui.table_arc_observation_weight, row_values)
         elif key == "PBIAS":
-            _append_plain_row(ui.tableWidget_4, values[:3])
+            _append_plain_row(ui.table_arc_measurement_bias, values[:3])
         elif key == "ObsBias":
             row_values, datetimes = _parse_obs_bias_row(values)
-            row = _append_plain_row(ui.tableWidget_5, row_values)
+            row = _append_plain_row(ui.table_arc_fixed_measurement_bias, row_values)
             if len(datetimes) > 0:
-                set_datetime_cell(ui.tableWidget_5, row, 4, datetimes[0])
+                set_datetime_cell(ui.table_arc_fixed_measurement_bias, row, 4, datetimes[0])
             if len(datetimes) > 1:
-                set_datetime_cell(ui.tableWidget_5, row, 5, datetimes[1])
+                set_datetime_cell(ui.table_arc_fixed_measurement_bias, row, 5, datetimes[1])
         elif key == "SelectObs":
             pass_number, satellite_1 = _split_select_satellite_1(values[3] if len(values) > 3 else "")
             row_values = [
@@ -865,30 +865,30 @@ def read_lcp(path: str | Path, ui) -> None:
                 "",
                 "",
             ]
-            row = _append_plain_row(ui.tableWidget_6, row_values)
+            row = _append_plain_row(ui.table_arc_select_observation, row_values)
             datetimes = _row_datetimes(values, 5)
             if len(datetimes) > 0:
-                set_datetime_cell(ui.tableWidget_6, row, 6, datetimes[0])
+                set_datetime_cell(ui.table_arc_select_observation, row, 6, datetimes[0])
             if len(datetimes) > 1:
-                set_datetime_cell(ui.tableWidget_6, row, 7, datetimes[1])
+                set_datetime_cell(ui.table_arc_select_observation, row, 7, datetimes[1])
         elif key == "Discard":
-            row = _append_plain_row(ui.tableWidget_7, values[:5])
+            row = _append_plain_row(ui.table_arc_delete_observation, values[:5])
             datetimes = _row_datetimes(values, 5)
             if len(datetimes) > 0:
-                set_datetime_cell(ui.tableWidget_7, row, 5, datetimes[0])
+                set_datetime_cell(ui.table_arc_delete_observation, row, 5, datetimes[0])
             if len(datetimes) > 1:
-                set_datetime_cell(ui.tableWidget_7, row, 6, datetimes[1])
+                set_datetime_cell(ui.table_arc_delete_observation, row, 6, datetimes[1])
         elif key == "PerAccNum":
             if values:
-                ui.spinBox_3.setValue(int(float(values[0])))
-            ui.comboBox_8.setCurrentIndex(0)
+                ui.spin_arc_per_acc_count.setValue(int(float(values[0])))
+            ui.combo_arc_per_acc_model_type.setCurrentIndex(0)
         elif key == "PerAccinf":
-            row = _append_plain_row(ui.tableWidget_8, [values[0] if values else "", "", "", values[3] if len(values) > 3 else "TDB"])
+            row = _append_plain_row(ui.table_arc_per_acc_period, [values[0] if values else "", "", "", values[3] if len(values) > 3 else "TDB"])
             datetimes = _row_datetimes(values, 1)
             if len(datetimes) > 0:
-                set_datetime_cell(ui.tableWidget_8, row, 1, datetimes[0])
+                set_datetime_cell(ui.table_arc_per_acc_period, row, 1, datetimes[0])
             if len(datetimes) > 1:
-                set_datetime_cell(ui.tableWidget_8, row, 2, datetimes[1])
+                set_datetime_cell(ui.table_arc_per_acc_period, row, 2, datetimes[1])
         elif key == "PerAcc":
             row_values = [
                 _coded_label(values[0] if len(values) > 0 else "", PER_ACC_DIRECTION_INFO),
@@ -896,14 +896,14 @@ def read_lcp(path: str | Path, ui) -> None:
                 values[2] if len(values) > 2 else "",
                 values[3] if len(values) > 3 else "",
             ]
-            _append_plain_row(ui.tableWidget_16, row_values)
+            _append_plain_row(ui.table_arc_per_acc_model, row_values)
         elif key == "StaBaKer":
-            ui.lineEdit_44.setText(value_text)
+            ui.edit_arc_spice_kernel_path.setText(value_text)
 
 
 def save_simcp(ui, save_path: str | Path) -> None:
     """从模拟观测表格生成 SimCP 控制卡片，保存时把中文类型转回数字码。"""
-    table = ui.tableWidget_17
+    table = ui.table_simulated_observations
     rows = list(_nonempty_rows(table))
 
     lines = _comment_header("SimCP 模拟观测卡片")
@@ -932,7 +932,7 @@ def save_simcp(ui, save_path: str | Path) -> None:
 
 def read_simcp(path: str | Path, ui) -> None:
     """读取 SimCP 模拟观测卡片并填充模拟观测表格。"""
-    table = ui.tableWidget_17
+    table = ui.table_simulated_observations
     table.setRowCount(0)
     current_type = ""
     global_interval = ""
@@ -961,8 +961,8 @@ def read_simcp(path: str | Path, ui) -> None:
         for col, value in enumerate(values):
             if col not in (5, 6):
                 _set_item(table, row, col, value)
-        start = current.get("start") or ui.dateTimeEdit.dateTime().toString("yyyy-MM-dd HH:mm:ss.zzz")
-        end = current.get("end") or ui.dateTimeEdit_2.dateTime().toString("yyyy-MM-dd HH:mm:ss.zzz")
+        start = current.get("start") or ui.date_arc_start_time.dateTime().toString("yyyy-MM-dd HH:mm:ss.zzz")
+        end = current.get("end") or ui.date_arc_end_time.dateTime().toString("yyyy-MM-dd HH:mm:ss.zzz")
         set_datetime_cell(table, row, 5, start)
         set_datetime_cell(table, row, 6, end)
         current = {}
@@ -1007,18 +1007,18 @@ def read_simcp(path: str | Path, ui) -> None:
 
 def save_stacp(ui, save_path: str | Path) -> None:
     """从测站参数表格和全局测站设置生成 StaCP 控制卡片。"""
-    table = ui.tableWidget_26
+    table = ui.table_station_parameters
     rows = list(_nonempty_rows(table))
     lines = _comment_header("StaCP 测站参数卡片")
     lines.append(f"STATION {len(rows)}")
-    lines.append(f"ELCUTOFF {ui.lineEdit_88.text().strip() or '15.0'}")
-    lines.append(f"GEODETIC {ui.lineEdit_89.text().strip() or '6378137.000'} {ui.lineEdit_90.text().strip() or '298.257223563'}")
+    lines.append(f"ELCUTOFF {ui.edit_station_elevation_cutoff.text().strip() or '15.0'}")
+    lines.append(f"GEODETIC {ui.edit_station_earth_semimajor_axis.text().strip() or '6378137.000'} {ui.edit_station_earth_flattening.text().strip() or '298.257223563'}")
     lines.extend(["FIXED", ""])
     for row in rows:
         station_id = _item_text(table, row, 0)
         name = _item_text(table, row, 1)
         active = _coded_value(_item_text(table, row, 2, "激活"), STATION_STATUS_INFO)
-        cutoff = _item_text(table, row, 3, ui.lineEdit_88.text().strip() or "15.0")
+        cutoff = _item_text(table, row, 3, ui.edit_station_elevation_cutoff.text().strip() or "15.0")
         coord_type = _coded_value(_item_text(table, row, 4, "直角坐标系XYZ"), STATION_COORD_TYPE_INFO)
         planet = _coded_value(_item_text(table, row, 12, "地球测站"), STATION_BODY_INFO)
         lines.append(f"STAIDNAME {station_id} {name} {cutoff} {active} {planet}")
@@ -1033,7 +1033,7 @@ def save_stacp(ui, save_path: str | Path) -> None:
 
 def read_stacp(path: str | Path, ui) -> None:
     """读取 StaCP 测站参数卡片并恢复测站表格及测站全局参数。"""
-    table = ui.tableWidget_26
+    table = ui.table_station_parameters
     table.setRowCount(0)
     row = -1
     for line in _clean_lines(path):
@@ -1043,14 +1043,14 @@ def read_stacp(path: str | Path, ui) -> None:
         key = parts[0]
         values = parts[1:]
         if key == "STATION" and values:
-            ui.spinBox_7.setValue(int(float(values[0])))
+            ui.spin_station_count.setValue(int(float(values[0])))
         elif key == "ELCUTOFF" and values:
-            ui.lineEdit_88.setText(values[0])
+            ui.edit_station_elevation_cutoff.setText(values[0])
         elif key == "GEODETIC":
             if len(values) > 0:
-                ui.lineEdit_89.setText(values[0])
+                ui.edit_station_earth_semimajor_axis.setText(values[0])
             if len(values) > 1:
-                ui.lineEdit_90.setText(values[1])
+                ui.edit_station_earth_flattening.setText(values[1])
         elif key == "STAIDNAME":
             row += 1
             table.insertRow(row)

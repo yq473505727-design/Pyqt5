@@ -17,7 +17,7 @@ def read_simcp_to_table(simcp_path, table):
         pass
 
     ui = TableOnlyUi()
-    ui.tableWidget_17 = table
+    ui.table_simulated_observations = table
     card_io.read_simcp(Path(simcp_path), ui)
 
 

@@ -304,15 +304,15 @@ class MainWindow(QMainWindow):
         self._apply_style()
         self._align_text_widgets()
         self.ui.statusbar.showMessage(f"工作目录：{self.current_scheme_dir}")
-        self.ui.pushButton.setToolTip("新建定轨方案")
-        self.ui.pushButton_2.setToolTip("打开定轨方案")
-        self.ui.pushButton_3.setToolTip("保存定轨方案")
-        self.ui.pushButton_4.setToolTip("另存为定轨方案")
-        self.ui.pushButton_5.setToolTip("开始定轨")
-        self.ui.pushButton_6.setToolTip("查看图表")
+        self.ui.button_new_scheme.setToolTip("新建定轨方案")
+        self.ui.button_open_scheme.setToolTip("打开定轨方案")
+        self.ui.button_save_scheme.setToolTip("保存定轨方案")
+        self.ui.button_save_scheme_as.setToolTip("另存为定轨方案")
+        self.ui.button_start_orbit.setToolTip("开始定轨")
+        self.ui.button_show_chart.setToolTip("查看图表")
         self._apply_toolbar_icons()
-        if self.ui.dateTimeEdit.dateTime().secsTo(self.ui.dateTimeEdit_2.dateTime()) <= 0:
-            self.ui.dateTimeEdit_2.setDateTime(self.ui.dateTimeEdit.dateTime().addDays(1))
+        if self.ui.date_arc_start_time.dateTime().secsTo(self.ui.date_arc_end_time.dateTime()) <= 0:
+            self.ui.date_arc_end_time.setDateTime(self.ui.date_arc_start_time.dateTime().addDays(1))
         self._configure_global_parameters()
         self._configure_arc_parameters()
         self._apply_global_page_layout()
@@ -336,36 +336,36 @@ class MainWindow(QMainWindow):
             # ("月球", "10"),
             # ("火星", "2"),
         ]
-        self.ui.Runmode_2.clear()
+        self.ui.combo_integration_center.clear()
         for label, code in integration_centers:
-            self.ui.Runmode_2.addItem(label, code)
-        self.ui.Runmode_2.setCurrentIndex(0)
+            self.ui.combo_integration_center.addItem(label, code)
+        self.ui.combo_integration_center.setCurrentIndex(0)
         self._hide_gravity_inversion_order()
         self._sync_integration_center_controls()
 
-        if self.ui.comboBox_2.findText("DE440") < 0:
-            self.ui.comboBox_2.addItem("DE440", "440")
-        for index in range(self.ui.comboBox_2.count()):
-            text = self.ui.comboBox_2.itemText(index)
-            if self.ui.comboBox_2.itemData(index) is None and text.startswith("DE"):
-                self.ui.comboBox_2.setItemData(index, text.removeprefix("DE"))
-        self.ui.comboBox_2.setCurrentText("DE440")
+        if self.ui.combo_ephemeris_model.findText("DE440") < 0:
+            self.ui.combo_ephemeris_model.addItem("DE440", "440")
+        for index in range(self.ui.combo_ephemeris_model.count()):
+            text = self.ui.combo_ephemeris_model.itemText(index)
+            if self.ui.combo_ephemeris_model.itemData(index) is None and text.startswith("DE"):
+                self.ui.combo_ephemeris_model.setItemData(index, text.removeprefix("DE"))
+        self.ui.combo_ephemeris_model.setCurrentText("DE440")
 
         integrators = [("ode", "1"), ("Adams12", "2")]
         for index, (label, code) in enumerate(integrators):
-            if index >= self.ui.comboBox_6.count():
-                self.ui.comboBox_6.addItem(label, code)
+            if index >= self.ui.combo_integrator_type.count():
+                self.ui.combo_integrator_type.addItem(label, code)
             else:
-                self.ui.comboBox_6.setItemText(index, label)
-                self.ui.comboBox_6.setItemData(index, code)
-        self.ui.comboBox_6.setCurrentText("Adams12")
-        self.ui.comboBox_6.setToolTip("1=ode；2=Adams12（12阶 Adams-Bashforth-Moulton 预估校正固定步长积分器）")
+                self.ui.combo_integrator_type.setItemText(index, label)
+                self.ui.combo_integrator_type.setItemData(index, code)
+        self.ui.combo_integrator_type.setCurrentText("Adams12")
+        self.ui.combo_integrator_type.setToolTip("1=ode；2=Adams12（12阶 Adams-Bashforth-Moulton 预估校正固定步长积分器）")
         integrator_font = QFont("Microsoft YaHei", 8)
-        self.ui.label_51.setFont(integrator_font)
-        self.ui.comboBox_6.setFont(integrator_font)
+        self.ui.label_integrator_selection.setFont(integrator_font)
+        self.ui.combo_integrator_type.setFont(integrator_font)
 
-        self.ui.ForceCent_10.setChecked(True)
-        self.ui.ForceCent_11.setChecked(True)
+        self.ui.check_third_body_moon.setChecked(True)
+        self.ui.check_third_body_sun.setChecked(True)
 
         self._lock_unreleased_global_parameters()
 
@@ -376,54 +376,54 @@ class MainWindow(QMainWindow):
             ("仿真观测值", "2"),
             ("精密定轨", "4"),
         ]
-        self.ui.Runmode.clear()
+        self.ui.combo_run_mode.clear()
         for label, code in run_modes:
-            self.ui.Runmode.addItem(label, code)
-        self.ui.Runmode.setCurrentText("精密定轨")
-        self.ui.Runmode.setToolTip("1=轨道预报；2=仿真观测值；4=精密定轨")
+            self.ui.combo_run_mode.addItem(label, code)
+        self.ui.combo_run_mode.setCurrentText("精密定轨")
+        self.ui.combo_run_mode.setToolTip("1=轨道预报；2=仿真观测值；4=精密定轨")
 
     def _normalize_global_parameter_labels(self):
         """修正全局参数页面中的显示文字，使中文标签更清晰一致。"""
         for label, text in (
-            (self.ui.label_4, "引力场文件格式："),
-            (self.ui.label_27, "固体潮摄动："),
+            (self.ui.label_gravity_file_format, "引力场文件格式："),
+            (self.ui.label_solid_tide_perturbation, "固体潮摄动："),
         ):
             label.setText(text)
             label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
     def _hide_gravity_inversion_order(self):
         """隐藏当前版本暂未开放的重力场解算阶次输入区域。"""
-        self.ui.label_6.hide()
-        self.ui.spinBox_2.hide()
+        self.ui.label_gravity_inversion_degree.hide()
+        self.ui.spin_gravity_inversion_degree.hide()
 
     def _sync_integration_center_controls(self):
         """根据积分中心选择同步中心体相关复选框的可用状态。"""
-        center_code = str(self.ui.Runmode_2.currentData() or "0")
+        center_code = str(self.ui.combo_integration_center.currentData() or "0")
         is_earth_center = center_code in {"0", "399"}
         if is_earth_center:
-            self.ui.ForceCent_4.setChecked(False)
-        self.ui.ForceCent_4.setEnabled(not is_earth_center)
+            self.ui.check_third_body_earth.setChecked(False)
+        self.ui.check_third_body_earth.setEnabled(not is_earth_center)
 
     def _move_integrator_to_global_parameters(self):
         """把积分器选择控件从弧段参数页移到全局参数页显示。"""
-        if self.ui.comboBox_6.parent() is self.ui.horizontalLayoutWidget_16:
+        if self.ui.combo_integrator_type.parent() is self.ui.row_global_troposphere:
             return
 
-        self.ui.horizontalLayout_28.removeWidget(self.ui.label_51)
-        self.ui.horizontalLayout_28.removeWidget(self.ui.comboBox_6)
-        self.ui.label_51.setParent(self.ui.horizontalLayoutWidget_16)
-        self.ui.comboBox_6.setParent(self.ui.horizontalLayoutWidget_16)
+        self.ui.horizontalLayout_28.removeWidget(self.ui.label_integrator_selection)
+        self.ui.horizontalLayout_28.removeWidget(self.ui.combo_integrator_type)
+        self.ui.label_integrator_selection.setParent(self.ui.row_global_troposphere)
+        self.ui.combo_integrator_type.setParent(self.ui.row_global_troposphere)
 
         insert_at = max(self.ui.horizontalLayout_16.count() - 1, 0)
         self.ui.horizontalLayout_16.insertSpacing(insert_at, 24)
-        self.ui.horizontalLayout_16.insertWidget(insert_at + 1, self.ui.label_51)
-        self.ui.horizontalLayout_16.insertWidget(insert_at + 2, self.ui.comboBox_6)
-        self.ui.label_51.show()
-        self.ui.comboBox_6.show()
+        self.ui.horizontalLayout_16.insertWidget(insert_at + 1, self.ui.label_integrator_selection)
+        self.ui.horizontalLayout_16.insertWidget(insert_at + 2, self.ui.combo_integrator_type)
+        self.ui.label_integrator_selection.show()
+        self.ui.combo_integrator_type.show()
 
-        self.ui.horizontalLayoutWidget_28.hide()
-        if hasattr(self.ui, "line_16"):
-            self.ui.line_16.hide()
+        self.ui.row_arc_integrator_type.hide()
+        if hasattr(self.ui, "separator_arc_integrator_type"):
+            self.ui.separator_arc_integrator_type.hide()
 
     def _move_widget_y(self, widget, y):
         """只调整控件的纵坐标，保留原有横坐标和尺寸。"""
@@ -433,8 +433,8 @@ class MainWindow(QMainWindow):
     def _compact_arc_integrator_gap(self):
         """压缩弧段参数页中移走积分器后留下的垂直空隙。"""
         positions = {
-            "line_17": 250,
-            "tabWidget_2": 260,
+            "separator_arc_internal_tabs": 250,
+            "tabs_arc_parameter_details": 260,
         }
         for name, y in positions.items():
             widget = getattr(self.ui, name, None)
@@ -444,16 +444,16 @@ class MainWindow(QMainWindow):
     def _compact_arc_parameter_rows(self):
         """重新排列弧段参数页基础输入行，使页面更紧凑。"""
         positions = {
-            "line_13": 80,
-            "horizontalLayoutWidget_21": 90,
-            "horizontalLayoutWidget_22": 110,
-            "horizontalLayoutWidget_23": 130,
-            "horizontalLayoutWidget_24": 150,
-            "horizontalLayoutWidget_25": 170,
-            "line_14": 190,
-            "horizontalLayoutWidget_26": 200,
-            "line_15": 220,
-            "horizontalLayoutWidget_27": 230,
+            "separator_arc_time_span": 80,
+            "row_arc_time_span": 90,
+            "row_arc_initial_position": 110,
+            "row_arc_initial_velocity": 130,
+            "row_arc_position_prior": 150,
+            "row_arc_velocity_prior": 170,
+            "separator_arc_prior_errors": 190,
+            "row_arc_doppler_settings": 200,
+            "separator_arc_step_settings": 220,
+            "row_arc_step_settings": 230,
         }
         for name, y in positions.items():
             widget = getattr(self.ui, name, None)
@@ -462,27 +462,27 @@ class MainWindow(QMainWindow):
 
     def _lock_unreleased_global_parameters(self):
         """禁用当前版本尚未开放的全局参数控件。"""
-        self.ui.ForceCent_14.setChecked(False)
+        self.ui.check_solid_tide_perturbation.setChecked(False)
         self._lock_widgets(
-            self.ui.spinBox_2,
-            self.ui.label_27,
-            self.ui.ForceCent_14,
-            self.ui.label_28,
-            self.ui.lineEdit_23,
-            self.ui.label_29,
-            self.ui.lineEdit_24,
+            self.ui.spin_gravity_inversion_degree,
+            self.ui.label_solid_tide_perturbation,
+            self.ui.check_solid_tide_perturbation,
+            self.ui.label_solid_tide_k2_love_number,
+            self.ui.edit_solid_tide_k2_love_number,
+            self.ui.label_solid_tide_prior_error,
+            self.ui.edit_solid_tide_prior_error,
         )
 
     def _configure_per_acceleration_model(self):
         """初始化经验加速度模型选择，并隐藏未开放的有限推力选项。"""
-        self.ui.comboBox_8.clear()
-        self.ui.comboBox_8.addItem("经验加速度模型", 0)
-        # self.ui.comboBox_8.addItem("有限推力", 1)
-        self.ui.comboBox_8.setCurrentIndex(0)
-        self.ui.comboBox_8.setToolTip("当前仅启用经验加速度模型")
-        tab_index = self.ui.tabWidget_2.indexOf(self.ui.tab_11)
+        self.ui.combo_arc_per_acc_model_type.clear()
+        self.ui.combo_arc_per_acc_model_type.addItem("经验加速度模型", 0)
+        # self.ui.combo_arc_per_acc_model_type.addItem("有限推力", 1)
+        self.ui.combo_arc_per_acc_model_type.setCurrentIndex(0)
+        self.ui.combo_arc_per_acc_model_type.setToolTip("当前仅启用经验加速度模型")
+        tab_index = self.ui.tabs_arc_parameter_details.indexOf(self.ui.tab_arc_per_acceleration)
         if tab_index >= 0:
-            self.ui.tabWidget_2.setTabText(tab_index, "经验加速度模型")
+            self.ui.tabs_arc_parameter_details.setTabText(tab_index, "经验加速度模型")
 
     def _configure_arc_parameters(self):
         """配置弧段参数页的可见项、时间控件、快捷按钮和经验加速度入口。"""
@@ -495,110 +495,110 @@ class MainWindow(QMainWindow):
         self._remove_spice_kernel_path_row()
         self._align_arc_parameter_labels()
 
-        self.ui.checkBox.setChecked(False)
-        self._lock_widgets(self.ui.label_40, self.ui.checkBox)
+        self.ui.check_arc_albedo_radiation.setChecked(False)
+        self._lock_widgets(self.ui.label_arc_albedo_radiation, self.ui.check_arc_albedo_radiation)
         self._lock_widgets(
-            self.ui.label_52,
-            self.ui.lineEdit_40,
-            self.ui.label_53,
-            self.ui.lineEdit_41,
-            self.ui.label_54,
-            self.ui.lineEdit_42,
-            self.ui.label_55,
-            self.ui.comboBox_7,
+            self.ui.label_arc_partial_derivative_step,
+            self.ui.edit_arc_partial_derivative_step,
+            self.ui.label_arc_position_derivative_step,
+            self.ui.edit_arc_position_derivative_step,
+            self.ui.label_arc_velocity_derivative_step,
+            self.ui.edit_arc_velocity_derivative_step,
+            self.ui.label_arc_input_filter,
+            self.ui.combo_arc_input_filter,
         )
         self._ensure_observation_weight_help_button()
 
-        for editor in (self.ui.dateTimeEdit, self.ui.dateTimeEdit_2):
+        for editor in (self.ui.date_arc_start_time, self.ui.date_arc_end_time):
             editor.setCalendarPopup(True)
             editor.setDisplayFormat("yyyy-MM-dd HH:mm:ss.zzz")
 
-        if not hasattr(self.ui, "pushButton_arc_start_now"):
-            self.ui.pushButton_arc_start_now = QPushButton("当前", self.ui.horizontalLayoutWidget_21)
-            self.ui.pushButton_arc_start_now.setObjectName("pushButton_arc_start_now")
-            self.ui.horizontalLayout_21.insertWidget(3, self.ui.pushButton_arc_start_now)
+        if not hasattr(self.ui, "button_arc_start_now"):
+            self.ui.button_arc_start_now = QPushButton("当前", self.ui.row_arc_time_span)
+            self.ui.button_arc_start_now.setObjectName("button_arc_start_now")
+            self.ui.horizontalLayout_21.insertWidget(3, self.ui.button_arc_start_now)
 
-        if not hasattr(self.ui, "pushButton_arc_end_now"):
-            self.ui.pushButton_arc_end_now = QPushButton("+7天", self.ui.horizontalLayoutWidget_21)
-            self.ui.pushButton_arc_end_now.setObjectName("pushButton_arc_end_now")
-            self.ui.horizontalLayout_21.insertWidget(7, self.ui.pushButton_arc_end_now)
+        if not hasattr(self.ui, "button_arc_end_plus7"):
+            self.ui.button_arc_end_plus7 = QPushButton("+7天", self.ui.row_arc_time_span)
+            self.ui.button_arc_end_plus7.setObjectName("button_arc_end_plus7")
+            self.ui.horizontalLayout_21.insertWidget(7, self.ui.button_arc_end_plus7)
 
-        if not hasattr(self.ui, "pushButton_arc_end_plus5"):
-            self.ui.pushButton_arc_end_plus5 = QPushButton("+5天", self.ui.horizontalLayoutWidget_21)
-            self.ui.pushButton_arc_end_plus5.setObjectName("pushButton_arc_end_plus5")
-            self.ui.horizontalLayout_21.insertWidget(8, self.ui.pushButton_arc_end_plus5)
+        if not hasattr(self.ui, "button_arc_end_plus5"):
+            self.ui.button_arc_end_plus5 = QPushButton("+5天", self.ui.row_arc_time_span)
+            self.ui.button_arc_end_plus5.setObjectName("button_arc_end_plus5")
+            self.ui.horizontalLayout_21.insertWidget(8, self.ui.button_arc_end_plus5)
 
         time_layout = self.ui.horizontalLayout_21
-        time_layout.removeWidget(self.ui.pushButton_arc_end_plus5)
-        time_layout.removeWidget(self.ui.pushButton_arc_end_now)
-        time_layout.insertWidget(7, self.ui.pushButton_arc_end_plus5)
-        time_layout.insertWidget(8, self.ui.pushButton_arc_end_now)
+        time_layout.removeWidget(self.ui.button_arc_end_plus5)
+        time_layout.removeWidget(self.ui.button_arc_end_plus7)
+        time_layout.insertWidget(7, self.ui.button_arc_end_plus5)
+        time_layout.insertWidget(8, self.ui.button_arc_end_plus7)
 
-        self.ui.pushButton_arc_start_now.setText("当前")
-        self.ui.pushButton_arc_start_now.setToolTip("同步为电脑当前时间，并同步弧段结束时刻")
-        self.ui.pushButton_arc_end_now.setText("+7天")
-        self.ui.pushButton_arc_end_now.setToolTip("弧段结束时刻 = 弧段初始时刻 + 7 天")
-        self.ui.pushButton_arc_end_plus5.setText("+5天")
-        self.ui.pushButton_arc_end_plus5.setToolTip("弧段结束时刻 = 弧段初始时刻 + 5 天")
+        self.ui.button_arc_start_now.setText("当前")
+        self.ui.button_arc_start_now.setToolTip("同步为电脑当前时间，并同步弧段结束时刻")
+        self.ui.button_arc_end_plus7.setText("+7天")
+        self.ui.button_arc_end_plus7.setToolTip("弧段结束时刻 = 弧段初始时刻 + 7 天")
+        self.ui.button_arc_end_plus5.setText("+5天")
+        self.ui.button_arc_end_plus5.setToolTip("弧段结束时刻 = 弧段初始时刻 + 5 天")
 
         time_font = QFont("Microsoft YaHei", 8)
         for widget in (
-            self.ui.label_41,
-            self.ui.dateTimeEdit,
-            self.ui.pushButton_arc_start_now,
-            self.ui.label_43,
-            self.ui.dateTimeEdit_2,
-            self.ui.pushButton_arc_end_plus5,
-            self.ui.pushButton_arc_end_now,
+            self.ui.label_arc_start_time,
+            self.ui.date_arc_start_time,
+            self.ui.button_arc_start_now,
+            self.ui.label_arc_end_time,
+            self.ui.date_arc_end_time,
+            self.ui.button_arc_end_plus5,
+            self.ui.button_arc_end_plus7,
         ):
             widget.setFont(time_font)
 
-        for button in (self.ui.pushButton_arc_start_now, self.ui.pushButton_arc_end_now, self.ui.pushButton_arc_end_plus5):
+        for button in (self.ui.button_arc_start_now, self.ui.button_arc_end_plus7, self.ui.button_arc_end_plus5):
             button.setMinimumHeight(18)
             button.setMaximumHeight(22)
 
-        self.ui.pushButton_arc_start_now.clicked.connect(self._set_arc_start_to_now)
-        self.ui.pushButton_arc_end_now.clicked.connect(lambda: self._set_arc_end_days_after_start(7))
-        self.ui.pushButton_arc_end_plus5.clicked.connect(lambda: self._set_arc_end_days_after_start(5))
+        self.ui.button_arc_start_now.clicked.connect(self._set_arc_start_to_now)
+        self.ui.button_arc_end_plus7.clicked.connect(lambda: self._set_arc_end_days_after_start(7))
+        self.ui.button_arc_end_plus5.clicked.connect(lambda: self._set_arc_end_days_after_start(5))
 
     def _comment_out_solar_panel_area(self):
         """隐藏当前界面暂不使用的太阳帆板面积输入项。"""
-        self.ui.label_36.hide()
-        self.ui.lineEdit_28.hide()
+        self.ui.label_arc_solar_panel_area.hide()
+        self.ui.edit_arc_solar_panel_area.hide()
 
     def _remove_albedo_radiation_row(self):
         """隐藏反照辐射相关行并禁用对应开关。"""
-        for widget_name in ("horizontalLayoutWidget_20", "line_12"):
+        for widget_name in ("row_arc_albedo_radiation", "separator_arc_albedo_radiation"):
             widget = getattr(self.ui, widget_name, None)
             if widget:
                 widget.hide()
-        self.ui.label_40.hide()
-        self.ui.checkBox.hide()
+        self.ui.label_arc_albedo_radiation.hide()
+        self.ui.check_arc_albedo_radiation.hide()
 
     def _comment_out_doppler_inverse_time(self):
         """隐藏多普勒积分时间输入项，保留内部默认处理。"""
-        self.ui.label_48.hide()
-        self.ui.lineEdit_37.hide()
+        self.ui.label_arc_doppler_inverse_time.hide()
+        self.ui.edit_arc_doppler_inverse_time.hide()
 
     def _replace_orbit_step_edits(self):
         """用下拉框替换积分步长和输出步长的自由文本输入。"""
-        self.ui.comboBox_integ_step = self._ensure_step_combo(
-            "comboBox_integ_step",
-            self.ui.lineEdit_38,
+        self.ui.combo_arc_integration_step = self._ensure_step_combo(
+            "combo_arc_integration_step",
+            self.ui.edit_arc_integration_step_legacy,
             self.ui.horizontalLayout_27,
         )
-        self.ui.comboBox_print_step = self._ensure_step_combo(
-            "comboBox_print_step",
-            self.ui.lineEdit_39,
+        self.ui.combo_arc_output_step = self._ensure_step_combo(
+            "combo_arc_output_step",
+            self.ui.edit_arc_output_step_legacy,
             self.ui.horizontalLayout_27,
         )
 
         step_font = QFont("Microsoft YaHei", 8)
         for widget in (
-            self.ui.label_49,
-            self.ui.comboBox_integ_step,
-            self.ui.label_50,
-            self.ui.comboBox_print_step,
+            self.ui.label_arc_integration_step,
+            self.ui.combo_arc_integration_step,
+            self.ui.label_arc_output_step,
+            self.ui.combo_arc_output_step,
         ):
             widget.setFont(step_font)
 
@@ -644,52 +644,52 @@ class MainWindow(QMainWindow):
 
     def _remove_arc_derivative_filter_rows(self):
         """隐藏轨道偏导和观测滤波相关行，避免未开放功能被误用。"""
-        for widget_name in ("horizontalLayoutWidget_29", "line_18"):
+        for widget_name in ("row_arc_derivative_filter", "separator_arc_derivative_filter"):
             widget = getattr(self.ui, widget_name, None)
             if widget:
                 widget.hide()
         for widget in (
-            self.ui.label_52,
-            self.ui.lineEdit_40,
-            self.ui.label_53,
-            self.ui.lineEdit_41,
-            self.ui.label_54,
-            self.ui.lineEdit_42,
-            self.ui.label_55,
-            self.ui.comboBox_7,
+            self.ui.label_arc_partial_derivative_step,
+            self.ui.edit_arc_partial_derivative_step,
+            self.ui.label_arc_position_derivative_step,
+            self.ui.edit_arc_position_derivative_step,
+            self.ui.label_arc_velocity_derivative_step,
+            self.ui.edit_arc_velocity_derivative_step,
+            self.ui.label_arc_input_filter,
+            self.ui.combo_arc_input_filter,
         ):
             widget.hide()
             widget.setEnabled(False)
 
     def _remove_spice_kernel_path_row(self):
         """隐藏 SPICE 内核路径输入行，new 版本改用固定资源目录。"""
-        for widget_name in ("horizontalLayoutWidget_30", "line_19"):
+        for widget_name in ("row_arc_spice_kernel_path", "separator_arc_spice_kernel"):
             widget = getattr(self.ui, widget_name, None)
             if widget:
                 widget.hide()
-        self.ui.label_56.hide()
-        self.ui.lineEdit_44.hide()
-        self.ui.lineEdit_44.setEnabled(False)
+        self.ui.label_arc_spice_kernel_path.hide()
+        self.ui.edit_arc_spice_kernel_path.hide()
+        self.ui.edit_arc_spice_kernel_path.setEnabled(False)
 
     def _align_arc_parameter_labels(self):
         """统一弧段参数页标签的右对齐方式。"""
         labels = (
-            self.ui.label_32,
-            self.ui.label_33,
-            self.ui.label_34,
-            self.ui.label_35,
-            self.ui.label_37,
-            self.ui.label_38,
-            self.ui.label_39,
-            self.ui.label_41,
-            self.ui.label_43,
-            self.ui.label_42,
-            self.ui.label_44,
-            self.ui.label_45,
-            self.ui.label_46,
-            self.ui.label_47,
-            self.ui.label_49,
-            self.ui.label_50,
+            self.ui.label_arc_satellite_id,
+            self.ui.label_arc_initial_frame,
+            self.ui.label_arc_initial_orbit_type,
+            self.ui.label_arc_satellite_mass,
+            self.ui.label_arc_body_area,
+            self.ui.label_arc_solar_pressure_coefficient,
+            self.ui.label_arc_solar_pressure_prior_error,
+            self.ui.label_arc_start_time,
+            self.ui.label_arc_end_time,
+            self.ui.label_arc_initial_position,
+            self.ui.label_arc_initial_velocity,
+            self.ui.label_arc_position_prior,
+            self.ui.label_arc_velocity_prior,
+            self.ui.label_arc_doppler_integration_time,
+            self.ui.label_arc_integration_step,
+            self.ui.label_arc_output_step,
         )
         for label in labels:
             label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
@@ -699,16 +699,16 @@ class MainWindow(QMainWindow):
         first_column_width = 168
         left_margin = 24
         for layout, label in (
-            (self.ui.horizontalLayout_17, self.ui.label_32),
-            (self.ui.horizontalLayout_18, self.ui.label_35),
-            (self.ui.horizontalLayout_19, self.ui.label_38),
-            (self.ui.horizontalLayout_21, self.ui.label_41),
-            (self.ui.horizontalLayout_22, self.ui.label_42),
-            (self.ui.horizontalLayout_23, self.ui.label_44),
-            (self.ui.horizontalLayout_24, self.ui.label_45),
-            (self.ui.horizontalLayout_25, self.ui.label_46),
-            (self.ui.horizontalLayout_26, self.ui.label_47),
-            (self.ui.horizontalLayout_27, self.ui.label_49),
+            (self.ui.horizontalLayout_17, self.ui.label_arc_satellite_id),
+            (self.ui.horizontalLayout_18, self.ui.label_arc_satellite_mass),
+            (self.ui.horizontalLayout_19, self.ui.label_arc_solar_pressure_coefficient),
+            (self.ui.horizontalLayout_21, self.ui.label_arc_start_time),
+            (self.ui.horizontalLayout_22, self.ui.label_arc_initial_position),
+            (self.ui.horizontalLayout_23, self.ui.label_arc_initial_velocity),
+            (self.ui.horizontalLayout_24, self.ui.label_arc_position_prior),
+            (self.ui.horizontalLayout_25, self.ui.label_arc_velocity_prior),
+            (self.ui.horizontalLayout_26, self.ui.label_arc_doppler_integration_time),
+            (self.ui.horizontalLayout_27, self.ui.label_arc_integration_step),
         ):
             layout.setSpacing(4)
             self._set_spacer_width(layout, 0, left_margin)
@@ -717,12 +717,12 @@ class MainWindow(QMainWindow):
     def _set_arc_start_to_now(self):
         """把弧段起止时刻同步设置为当前系统时间。"""
         current = QDateTime.currentDateTime()
-        self.ui.dateTimeEdit.setDateTime(current)
-        self.ui.dateTimeEdit_2.setDateTime(current)
+        self.ui.date_arc_start_time.setDateTime(current)
+        self.ui.date_arc_end_time.setDateTime(current)
 
     def _set_arc_end_days_after_start(self, days):
         """按起始时刻向后推指定天数设置弧段结束时刻。"""
-        self.ui.dateTimeEdit_2.setDateTime(self.ui.dateTimeEdit.dateTime().addDays(days))
+        self.ui.date_arc_end_time.setDateTime(self.ui.date_arc_start_time.dateTime().addDays(days))
 
     @staticmethod
     def _lock_widgets(*widgets):
@@ -734,12 +734,12 @@ class MainWindow(QMainWindow):
         """确保观测值权重表旁存在“说明”按钮并连接帮助弹窗。"""
         button = getattr(self.ui, "pushButton_obs_weight_help", None)
         if button is None:
-            button = QPushButton("说明", self.ui.groupBox)
+            button = QPushButton("说明", self.ui.group_arc_observation_weight)
             button.setObjectName("pushButton_obs_weight_help")
             self.ui.pushButton_obs_weight_help = button
         button.setText("说明")
         button.setToolTip("查看观测值类型和权重说明")
-        button.setGeometry(self.ui.pushButton_9.x(), self.ui.pushButton_9.y() + 30, self.ui.pushButton_9.width(), self.ui.pushButton_9.height())
+        button.setGeometry(self.ui.button_arc_observation_weight_delete.x(), self.ui.button_arc_observation_weight_delete.y() + 30, self.ui.button_arc_observation_weight_delete.width(), self.ui.button_arc_observation_weight_delete.height())
         if not button.property("help_connected"):
             button.clicked.connect(self.show_observation_weight_help)
             button.setProperty("help_connected", True)
@@ -755,12 +755,12 @@ class MainWindow(QMainWindow):
         self.ui.tabWidget.setDocumentMode(True)
 
         toolbar_buttons = [
-            self.ui.pushButton,
-            self.ui.pushButton_2,
-            self.ui.pushButton_3,
-            self.ui.pushButton_4,
-            self.ui.pushButton_5,
-            self.ui.pushButton_6,
+            self.ui.button_new_scheme,
+            self.ui.button_open_scheme,
+            self.ui.button_save_scheme,
+            self.ui.button_save_scheme_as,
+            self.ui.button_start_orbit,
+            self.ui.button_show_chart,
         ]
         x = 18
         for index, button in enumerate(toolbar_buttons):
@@ -911,8 +911,8 @@ class MainWindow(QMainWindow):
     def _align_text_widgets(self):
         """统一标签、输入控件、按钮和分隔线的尺寸与对齐方式。"""
         section_labels = {
-            "label_8", "label_125", "label_126", "label_127", "label_128",
-            "label_58", "label_60",
+            "label_planet_gravity_section", "label_output_orbit_solution", "label_output_ephemeris_solution", "label_visual_orbit_plot", "label_visual_residual_plot",
+            "label_simulation_import_card", "label_simulation_generate_observations",
         }
         for label in self.findChildren(QLabel):
             if label.objectName() in section_labels:
@@ -939,12 +939,12 @@ class MainWindow(QMainWindow):
             checkbox.setMaximumHeight(20)
         for button in self.findChildren(QPushButton):
             if button not in {
-                self.ui.pushButton,
-                self.ui.pushButton_2,
-                self.ui.pushButton_3,
-                self.ui.pushButton_4,
-                self.ui.pushButton_5,
-                self.ui.pushButton_6,
+                self.ui.button_new_scheme,
+                self.ui.button_open_scheme,
+                self.ui.button_save_scheme,
+                self.ui.button_save_scheme_as,
+                self.ui.button_start_orbit,
+                self.ui.button_show_chart,
             }:
                 button.setMinimumHeight(18)
                 button.setMaximumHeight(22)
@@ -990,24 +990,24 @@ class MainWindow(QMainWindow):
 
     def _apply_global_page_layout(self):
         """根据窗口宽度重排全局参数页的各行控件和行星参数区。"""
-        page_width = max(self.ui.tab.width() - 8, 980)
+        page_width = max(self.ui.page_global_parameters.width() - 8, 980)
         rows = [
-            self.ui.horizontalLayoutWidget,
-            self.ui.horizontalLayoutWidget_2,
-            self.ui.horizontalLayoutWidget_3,
-            self.ui.horizontalLayoutWidget_4,
-            self.ui.horizontalLayoutWidget_5,
-            self.ui.horizontalLayoutWidget_6,
-            self.ui.horizontalLayoutWidget_7,
-            self.ui.horizontalLayoutWidget_8,
-            self.ui.horizontalLayoutWidget_9,
-            self.ui.horizontalLayoutWidget_10,
-            self.ui.horizontalLayoutWidget_11,
-            self.ui.horizontalLayoutWidget_12,
-            self.ui.horizontalLayoutWidget_13,
-            self.ui.horizontalLayoutWidget_14,
-            self.ui.horizontalLayoutWidget_15,
-            self.ui.horizontalLayoutWidget_16,
+            self.ui.row_global_run_mode,
+            self.ui.row_global_integration_center,
+            self.ui.row_global_central_gravity,
+            self.ui.row_global_gravity_field,
+            self.ui.row_global_third_body_ephemeris,
+            self.ui.row_global_planet_gravity_header,
+            self.ui.row_global_mercury_venus_gravity,
+            self.ui.row_global_earth_mars_gravity,
+            self.ui.row_global_jupiter_saturn_gravity,
+            self.ui.row_global_uranus_neptune_gravity,
+            self.ui.row_global_pluto_moon_gravity,
+            self.ui.row_global_sun_gravity,
+            self.ui.row_global_relativity,
+            self.ui.row_global_solar_pressure,
+            self.ui.row_global_solid_tide,
+            self.ui.row_global_troposphere,
         ]
         for row in rows:
             row.setGeometry(0, row.geometry().y(), page_width, row.geometry().height())
@@ -1015,10 +1015,10 @@ class MainWindow(QMainWindow):
                 row.layout().setContentsMargins(0, 0, 0, 0)
                 row.layout().setSpacing(6)
 
-        for line_name in ("line", "line_2", "line_3", "line_4", "line_5", "line_6", "line_7", "line_8", "line_9"):
-            line = getattr(self.ui, line_name, None)
-            if line:
-                line.setGeometry(0, line.geometry().y(), page_width, line.geometry().height())
+        for line_name in ("separator_global_run_mode", "separator_global_integration_center", "separator_global_gravity_field", "separator_global_third_body", "separator_global_planet_gravity", "separator_global_relativity", "separator_global_solar_pressure", "separator_global_solid_tide", "separator_global_troposphere"):
+            separator = getattr(self.ui, line_name, None)
+            if separator:
+                separator.setGeometry(0, separator.geometry().y(), page_width, separator.geometry().height())
 
         left = 48
         label_w = 136
@@ -1034,9 +1034,9 @@ class MainWindow(QMainWindow):
         header_pair_gap = 92
 
         top_specs = [
-            (self.ui.horizontalLayout, 0, [("label", label_w), ("Runmode", short_w)]),
-            (self.ui.horizontalLayout_2, 0, [("label_2", label_w), ("Runmode_2", short_w)]),
-            (self.ui.horizontalLayout_3, 0, [("label_3", label_w), ("ForceCent", check_w)]),
+            (self.ui.horizontalLayout, 0, [("label_run_mode", label_w), ("combo_run_mode", short_w)]),
+            (self.ui.horizontalLayout_2, 0, [("label_integration_center", label_w), ("combo_integration_center", short_w)]),
+            (self.ui.horizontalLayout_3, 0, [("label_central_gravity_field", label_w), ("check_central_gravity_field", check_w)]),
         ]
         for layout, spacer_index, widgets in top_specs:
             self._set_spacer_width(layout, spacer_index, left)
@@ -1048,16 +1048,16 @@ class MainWindow(QMainWindow):
         layout = self.ui.horizontalLayout_4
         layout.setSpacing(0)
         self._set_spacer_width(layout, 0, left)
-        self._set_widget_width(self.ui.label_4, label_w)
-        self._set_widget_width(self.ui.comboBox, short_w)
+        self._set_widget_width(self.ui.label_gravity_file_format, label_w)
+        self._set_widget_width(self.ui.combo_gravity_file_format, short_w)
         self._set_spacer_width(layout, 3, 24)
-        self._set_widget_width(self.ui.label_5, label_w)
-        self._set_widget_width(self.ui.spinBox, 72)
+        self._set_widget_width(self.ui.label_gravity_degree, label_w)
+        self._set_widget_width(self.ui.spin_gravity_degree, 72)
         self._set_spacer_width(layout, 6, 0)
-        if self.ui.label_6.isVisible():
-            self._set_widget_width(self.ui.label_6, label_w)
-        if self.ui.spinBox_2.isVisible():
-            self._set_widget_width(self.ui.spinBox_2, 72)
+        if self.ui.label_gravity_inversion_degree.isVisible():
+            self._set_widget_width(self.ui.label_gravity_inversion_degree, label_w)
+        if self.ui.spin_gravity_inversion_degree.isVisible():
+            self._set_widget_width(self.ui.spin_gravity_inversion_degree, 72)
         self._ensure_trailing_expander(layout)
         self._set_expanding_spacer(layout, layout.count() - 1)
         self._refresh_layout(layout)
@@ -1065,35 +1065,35 @@ class MainWindow(QMainWindow):
         layout = self.ui.horizontalLayout_5
         layout.setSpacing(4)
         self._set_spacer_width(layout, 0, left)
-        self._set_widget_width(self.ui.label_7, label_w)
-        for name in ("ForceCent_2", "ForceCent_3", "ForceCent_4", "ForceCent_5", "ForceCent_6", "ForceCent_7", "ForceCent_8", "ForceCent_9", "ForceCent_10", "ForceCent_11"):
+        self._set_widget_width(self.ui.label_third_body_ephemeris, label_w)
+        for name in ("check_third_body_mercury", "check_third_body_venus", "check_third_body_earth", "check_third_body_mars", "check_third_body_jupiter", "check_third_body_uranus", "check_third_body_neptune", "check_third_body_pluto", "check_third_body_moon", "check_third_body_sun"):
             self._set_widget_width(getattr(self.ui, name), 58)
         self._set_spacer_width(layout, 12, 10)
-        self._set_widget_width(self.ui.comboBox_2, 126)
+        self._set_widget_width(self.ui.combo_ephemeris_model, 126)
         self._refresh_layout(layout)
 
         header = self.ui.horizontalLayout_6
         header.setSpacing(4)
-        self._set_widget_width(self.ui.label_8, section_w)
+        self._set_widget_width(self.ui.label_planet_gravity_section, section_w)
         self._set_spacer_width(header, 1, 0)
-        self._set_widget_width(self.ui.label_11, gm_w)
+        self._set_widget_width(self.ui.label_planet_gm_header_left, gm_w)
         self._set_spacer_width(header, 3, 0)
-        self._set_widget_width(self.ui.label_12, radius_w)
+        self._set_widget_width(self.ui.label_planet_radius_header_left, radius_w)
         self._set_spacer_width(header, 5, header_pair_gap)
-        self._set_widget_width(self.ui.label_9, gm_w)
+        self._set_widget_width(self.ui.label_planet_gm_header_right, gm_w)
         self._set_spacer_width(header, 7, 0)
-        self._set_widget_width(self.ui.label_13, radius_w)
-        for label in (self.ui.label_11, self.ui.label_12, self.ui.label_9, self.ui.label_13):
+        self._set_widget_width(self.ui.label_planet_radius_header_right, radius_w)
+        for label in (self.ui.label_planet_gm_header_left, self.ui.label_planet_radius_header_left, self.ui.label_planet_gm_header_right, self.ui.label_planet_radius_header_right):
             label.setAlignment(Qt.AlignCenter)
         self._set_expanding_spacer(header, 9)
         self._refresh_layout(header)
 
         planet_rows = [
-            ("horizontalLayout_7", "label_14", "lineEdit", "lineEdit_2", "label_15", "lineEdit_3", "lineEdit_4"),
-            ("horizontalLayout_8", "label_16", "lineEdit_5", "lineEdit_6", "label_17", "lineEdit_7", "lineEdit_8"),
-            ("horizontalLayout_9", "label_18", "lineEdit_9", "lineEdit_10", "label_19", "lineEdit_11", "lineEdit_12"),
-            ("horizontalLayout_10", "label_20", "lineEdit_13", "lineEdit_14", "label_21", "lineEdit_15", "lineEdit_16"),
-            ("horizontalLayout_11", "label_22", "lineEdit_17", "lineEdit_18", "label_23", "lineEdit_19", "lineEdit_20"),
+            ("horizontalLayout_7", "label_mercury_gravity", "edit_mercury_gm", "edit_mercury_radius", "label_venus_gravity", "edit_venus_gm", "edit_venus_radius"),
+            ("horizontalLayout_8", "label_earth_gravity", "edit_earth_gm", "edit_earth_radius", "label_mars_gravity", "edit_mars_gm", "edit_mars_radius"),
+            ("horizontalLayout_9", "label_jupiter_gravity", "edit_jupiter_gm", "edit_jupiter_radius", "label_saturn_gravity", "edit_saturn_gm", "edit_saturn_radius"),
+            ("horizontalLayout_10", "label_uranus_gravity", "edit_uranus_gm", "edit_uranus_radius", "label_neptune_gravity", "edit_neptune_gm", "edit_neptune_radius"),
+            ("horizontalLayout_11", "label_pluto_gravity", "edit_pluto_gm", "edit_pluto_radius", "label_moon_gravity", "edit_moon_gm", "edit_moon_radius"),
         ]
         for layout_name, l1, gm1, r1, l2, gm2, r2 in planet_rows:
             layout = getattr(self.ui, layout_name)
@@ -1115,18 +1115,18 @@ class MainWindow(QMainWindow):
         self._set_spacer_width(sun, 0, left)
         self._set_spacer_width(sun, 1, 0)
         self._set_spacer_width(sun, 2, 0)
-        self._set_widget_width(self.ui.label_24, planet_label_w)
+        self._set_widget_width(self.ui.label_sun_gravity, planet_label_w)
         self._set_spacer_width(sun, 4, inner_gap)
-        self._set_widget_width(self.ui.lineEdit_21, gm_w)
-        self._set_widget_width(self.ui.lineEdit_22, radius_w)
+        self._set_widget_width(self.ui.edit_sun_gm, gm_w)
+        self._set_widget_width(self.ui.edit_sun_radius, radius_w)
         self._set_expanding_spacer(sun, 7)
         self._refresh_layout(sun)
 
         for layout, spacer, label, checkbox in [
-            (self.ui.horizontalLayout_13, 0, self.ui.label_10, self.ui.ForceCent_12),
-            (self.ui.horizontalLayout_14, 0, self.ui.label_25, self.ui.ForceCent_13),
-            (self.ui.horizontalLayout_15, 0, self.ui.label_27, self.ui.ForceCent_14),
-            (self.ui.horizontalLayout_16, 0, self.ui.label_30, self.ui.ForceCent_15),
+            (self.ui.horizontalLayout_13, 0, self.ui.label_relativity_perturbation, self.ui.check_relativity_perturbation),
+            (self.ui.horizontalLayout_14, 0, self.ui.label_solar_pressure_perturbation, self.ui.check_solar_radiation_pressure),
+            (self.ui.horizontalLayout_15, 0, self.ui.label_solid_tide_perturbation, self.ui.check_solid_tide_perturbation),
+            (self.ui.horizontalLayout_16, 0, self.ui.label_troposphere_delay, self.ui.check_troposphere_delay),
         ]:
             layout.setSpacing(0)
             self._set_spacer_width(layout, spacer, left)
@@ -1137,23 +1137,23 @@ class MainWindow(QMainWindow):
             self._refresh_layout(layout)
 
         self._set_spacer_width(self.ui.horizontalLayout_14, 3, 140)
-        self._set_widget_width(self.ui.label_26, 166)
-        self._set_widget_width(self.ui.comboBox_3, mid_w)
+        self._set_widget_width(self.ui.label_solar_pressure_model, 166)
+        self._set_widget_width(self.ui.combo_solar_pressure_model, mid_w)
         self._refresh_layout(self.ui.horizontalLayout_14)
 
         self._set_spacer_width(self.ui.horizontalLayout_15, 3, 80)
-        self._set_widget_width(self.ui.label_28, 154)
-        self._set_widget_width(self.ui.lineEdit_23, 150)
+        self._set_widget_width(self.ui.label_solid_tide_k2_love_number, 154)
+        self._set_widget_width(self.ui.edit_solid_tide_k2_love_number, 150)
         self._set_spacer_width(self.ui.horizontalLayout_15, 6, 30)
-        self._set_widget_width(self.ui.label_29, 94)
-        self._set_widget_width(self.ui.lineEdit_24, 130)
+        self._set_widget_width(self.ui.label_solid_tide_prior_error, 94)
+        self._set_widget_width(self.ui.edit_solid_tide_prior_error, 130)
         self._refresh_layout(self.ui.horizontalLayout_15)
 
         self._set_spacer_width(self.ui.horizontalLayout_16, 3, 140)
-        self._set_widget_width(self.ui.label_31, 166)
-        self._set_widget_width(self.ui.comboBox_4, 150)
-        self._set_widget_width(self.ui.label_51, 112)
-        self._set_widget_width(self.ui.comboBox_6, 120)
+        self._set_widget_width(self.ui.label_troposphere_model, 166)
+        self._set_widget_width(self.ui.combo_troposphere_model, 150)
+        self._set_widget_width(self.ui.label_integrator_selection, 112)
+        self._set_widget_width(self.ui.combo_integrator_type, 120)
         self._refresh_layout(self.ui.horizontalLayout_16)
 
     def _page_size(self, page):
@@ -1214,45 +1214,75 @@ class MainWindow(QMainWindow):
         """重排弧段参数页和内部观测/经验加速度页签的响应式布局。"""
         self._compact_arc_parameter_rows()
         self._compact_arc_integrator_gap()
-        self._stretch_layout_rows([f"horizontalLayoutWidget_{index}" for index in range(17, 31)], page_width)
-        for line_name in (f"line_{index}" for index in range(10, 20)):
-            line = getattr(self.ui, line_name, None)
-            if line:
-                self._stretch_width(line, page_width)
+        self._stretch_layout_rows(
+            [
+                "row_arc_satellite_identity",
+                "row_arc_mass_area",
+                "row_arc_solar_pressure",
+                "row_arc_albedo_radiation",
+                "row_arc_time_span",
+                "row_arc_initial_position",
+                "row_arc_initial_velocity",
+                "row_arc_position_prior",
+                "row_arc_velocity_prior",
+                "row_arc_doppler_settings",
+                "row_arc_step_settings",
+                "row_arc_integrator_type",
+                "row_arc_derivative_filter",
+                "row_arc_spice_kernel_path",
+            ],
+            page_width,
+        )
+        separator_width = max(self.ui.page_arc_parameters.width(), page_width)
+        for line_name in (
+            "separator_arc_mass_area",
+            "separator_arc_solar_pressure",
+            "separator_arc_albedo_radiation",
+            "separator_arc_time_span",
+            "separator_arc_prior_errors",
+            "separator_arc_step_settings",
+            "separator_arc_integrator_type",
+            "separator_arc_internal_tabs",
+            "separator_arc_derivative_filter",
+            "separator_arc_spice_kernel",
+        ):
+            separator = getattr(self.ui, line_name, None)
+            if separator:
+                self._stretch_width(separator, separator_width)
 
         self._align_arc_first_column()
 
         time_layout = self.ui.horizontalLayout_21
         for label in (
-            self.ui.label_33,
-            self.ui.label_34,
+            self.ui.label_arc_initial_frame,
+            self.ui.label_arc_initial_orbit_type,
         ):
             self._set_widget_width(label, 150)
 
-        self._set_widget_width(self.ui.dateTimeEdit, 185)
-        self._set_widget_width(self.ui.pushButton_arc_start_now, 48)
+        self._set_widget_width(self.ui.date_arc_start_time, 185)
+        self._set_widget_width(self.ui.button_arc_start_now, 48)
         self._set_spacer_width(time_layout, 4, 24)
-        self._set_widget_width(self.ui.label_43, 150)
-        self._set_widget_width(self.ui.dateTimeEdit_2, 185)
-        self._set_widget_width(self.ui.pushButton_arc_end_now, 48)
-        self._set_widget_width(self.ui.pushButton_arc_end_plus5, 48)
+        self._set_widget_width(self.ui.label_arc_end_time, 150)
+        self._set_widget_width(self.ui.date_arc_end_time, 185)
+        self._set_widget_width(self.ui.button_arc_end_plus7, 48)
+        self._set_widget_width(self.ui.button_arc_end_plus5, 48)
         self._set_expanding_spacer(time_layout, 9)
         self._refresh_layout(time_layout)
 
-        self._set_widget_width(self.ui.lineEdit_27, 96)
+        self._set_widget_width(self.ui.edit_arc_satellite_mass, 96)
         self._set_spacer_width(self.ui.horizontalLayout_18, 3, 16)
-        self._set_widget_width(self.ui.label_37, 150)
-        self._set_widget_width(self.ui.lineEdit_29, 78)
+        self._set_widget_width(self.ui.label_arc_body_area, 150)
+        self._set_widget_width(self.ui.edit_arc_body_area, 78)
         self._set_expanding_spacer(self.ui.horizontalLayout_18, self.ui.horizontalLayout_18.count() - 1)
-        self._set_widget_width(self.ui.lineEdit_30, 96)
+        self._set_widget_width(self.ui.edit_arc_solar_pressure_coefficient, 96)
         self._set_spacer_width(self.ui.horizontalLayout_19, 3, 16)
-        self._set_widget_width(self.ui.label_39, 86)
-        self._set_widget_width(self.ui.lineEdit_31, 96)
+        self._set_widget_width(self.ui.label_arc_solar_pressure_prior_error, 86)
+        self._set_widget_width(self.ui.edit_arc_solar_pressure_prior_error, 96)
         self._set_expanding_spacer(self.ui.horizontalLayout_19, self.ui.horizontalLayout_19.count() - 1)
-        self._set_widget_width(self.ui.lineEdit_36, 76)
-        self._set_widget_width(self.ui.comboBox_integ_step, 76)
-        self._set_widget_width(self.ui.label_50, 150)
-        self._set_widget_width(self.ui.comboBox_print_step, 76)
+        self._set_widget_width(self.ui.edit_arc_doppler_integration_time, 76)
+        self._set_widget_width(self.ui.combo_arc_integration_step, 76)
+        self._set_widget_width(self.ui.label_arc_output_step, 150)
+        self._set_widget_width(self.ui.combo_arc_output_step, 76)
         self._set_expanding_spacer(self.ui.horizontalLayout_26, self.ui.horizontalLayout_26.count() - 1)
         self._set_expanding_spacer(self.ui.horizontalLayout_27, self.ui.horizontalLayout_27.count() - 1)
         for layout in (
@@ -1271,35 +1301,35 @@ class MainWindow(QMainWindow):
             self._refresh_layout(layout)
         self._refresh_layout(self.ui.horizontalLayout_27)
 
-        tab_geometry = self.ui.tabWidget_2.geometry()
-        self.ui.tabWidget_2.setGeometry(
+        tab_geometry = self.ui.tabs_arc_parameter_details.geometry()
+        self.ui.tabs_arc_parameter_details.setGeometry(
             tab_geometry.x(),
             tab_geometry.y(),
             max(page_width - tab_geometry.x(), 640),
             max(page_height - tab_geometry.y() + 8, 220),
         )
 
-        sub_width = max(self.ui.tabWidget_2.width() - 8, 940)
-        sub_height = max(self.ui.tabWidget_2.height() - 28, 210)
+        sub_width = max(self.ui.tabs_arc_parameter_details.width() - 8, 940)
+        sub_height = max(self.ui.tabs_arc_parameter_details.height() - 28, 210)
         half_width = sub_width // 2
 
-        for left_group, right_group in ((self.ui.groupBox, self.ui.groupBox_3), (self.ui.groupBox_2, self.ui.groupBox_4)):
+        for left_group, right_group in ((self.ui.group_arc_observation_weight, self.ui.group_arc_measurement_bias), (self.ui.group_arc_per_acc_period, self.ui.group_arc_per_acc_model)):
             top = left_group.geometry().y()
             left_group.setGeometry(0, top, half_width, max(sub_height - top, 140))
             right_group.setGeometry(half_width, top, sub_width - half_width - 8, left_group.height())
 
-        weight_buttons = [self.ui.pushButton_7, self.ui.pushButton_8, self.ui.pushButton_9]
+        weight_buttons = [self.ui.button_arc_observation_weight_add, self.ui.button_arc_observation_weight_edit, self.ui.button_arc_observation_weight_delete]
         if hasattr(self.ui, "pushButton_obs_weight_help"):
             weight_buttons.append(self.ui.pushButton_obs_weight_help)
-        self._fill_group_table_with_side_buttons(self.ui.groupBox, self.ui.tableWidget_2, weight_buttons)
-        self._fill_group_table_with_side_buttons(self.ui.groupBox_3, self.ui.tableWidget_4, [self.ui.pushButton_13, self.ui.pushButton_14, self.ui.pushButton_15])
-        self._fill_group_table_below_buttons(self.ui.groupBox_2, self.ui.tableWidget_8)
-        self._fill_group_table_below_buttons(self.ui.groupBox_4, self.ui.tableWidget_16)
+        self._fill_group_table_with_side_buttons(self.ui.group_arc_observation_weight, self.ui.table_arc_observation_weight, weight_buttons)
+        self._fill_group_table_with_side_buttons(self.ui.group_arc_measurement_bias, self.ui.table_arc_measurement_bias, [self.ui.button_arc_measurement_bias_add, self.ui.button_arc_measurement_bias_edit, self.ui.button_arc_measurement_bias_delete])
+        self._fill_group_table_below_buttons(self.ui.group_arc_per_acc_period, self.ui.table_arc_per_acc_period)
+        self._fill_group_table_below_buttons(self.ui.group_arc_per_acc_model, self.ui.table_arc_per_acc_model)
 
         for table, buttons in (
-            (self.ui.tableWidget_5, [self.ui.pushButton_16, self.ui.pushButton_18, self.ui.pushButton_17]),
-            (self.ui.tableWidget_6, [self.ui.pushButton_19, self.ui.pushButton_21, self.ui.pushButton_20]),
-            (self.ui.tableWidget_7, [self.ui.pushButton_22, self.ui.pushButton_24, self.ui.pushButton_23]),
+            (self.ui.table_arc_fixed_measurement_bias, [self.ui.button_arc_fixed_bias_add, self.ui.button_arc_fixed_bias_edit, self.ui.button_arc_fixed_bias_delete]),
+            (self.ui.table_arc_select_observation, [self.ui.button_arc_select_observation_add, self.ui.button_arc_select_observation_edit, self.ui.button_arc_select_observation_delete]),
+            (self.ui.table_arc_delete_observation, [self.ui.button_arc_delete_observation_add, self.ui.button_arc_delete_observation_edit, self.ui.button_arc_delete_observation_delete]),
         ):
             self._fill_table_with_side_buttons(table, buttons, sub_width, sub_height, bottom_margin=0)
         self._fit_observation_bias_columns()
@@ -1309,39 +1339,39 @@ class MainWindow(QMainWindow):
 
     def _apply_secondary_pages_layout(self):
         """重排模拟观测、测站参数、运行日志和图表页面的布局。"""
-        page_width, page_height = self._page_size(self.ui.tab_2)
+        page_width, page_height = self._page_size(self.ui.page_arc_parameters)
         self._apply_arc_page_layout(page_width, page_height)
 
-        for tab, row_names, table, buttons in (
-            (self.ui.tab_3, ["horizontalLayoutWidget_32"], self.ui.tableWidget_17, [self.ui.pushButton_73, self.ui.pushButton_75, self.ui.pushButton_74]),
-            (self.ui.tab_4, ["horizontalLayoutWidget_65"], self.ui.tableWidget_26, [self.ui.pushButton_76, self.ui.pushButton_77, self.ui.pushButton_78]),
+        for page, row_names, table, buttons in (
+            (self.ui.page_simulation_observations, ["row_simulation_card_actions"], self.ui.table_simulated_observations, [self.ui.button_simulation_observation_add, self.ui.button_simulation_observation_edit, self.ui.button_simulation_observation_delete]),
+            (self.ui.page_station_parameters, ["row_station_global_settings"], self.ui.table_station_parameters, [self.ui.button_station_add, self.ui.button_station_edit, self.ui.button_station_delete]),
         ):
-            page_width, page_height = self._page_size(tab)
+            page_width, page_height = self._page_size(page)
             self._stretch_layout_rows(row_names, page_width)
             self._fill_table_with_side_buttons(table, buttons, page_width, page_height)
-            if table is self.ui.tableWidget_26:
+            if table is self.ui.table_station_parameters:
                 self._fit_station_columns()
 
-        page_width, page_height = self._page_size(self.ui.tab_5)
-        self.ui.groupBox_9.setGeometry(
+        page_width, page_height = self._page_size(self.ui.page_orbit_output)
+        self.ui.group_orbit_process.setGeometry(
             0,
             0,
             max(page_width, 320),
             max(page_height, 160),
         )
-        self._stretch_layout_rows(["horizontalLayoutWidget_68"], self.ui.groupBox_9.width())
-        text_geometry = self.ui.textEdit.geometry()
-        self.ui.textEdit.setGeometry(
+        self._stretch_layout_rows(["row_orbit_process_actions"], self.ui.group_orbit_process.width())
+        text_geometry = self.ui.text_orbit_process_log.geometry()
+        self.ui.text_orbit_process_log.setGeometry(
             text_geometry.x(),
             text_geometry.y(),
-            max(self.ui.groupBox_9.width() - text_geometry.x(), 320),
-            max(self.ui.groupBox_9.height() - text_geometry.y() - 10, 100),
+            max(self.ui.group_orbit_process.width() - text_geometry.x(), 320),
+            max(self.ui.group_orbit_process.height() - text_geometry.y() - 10, 100),
         )
 
-        page_width, page_height = self._page_size(self.ui.tab_6)
-        self._stretch_layout_rows(["horizontalLayoutWidget_69"], page_width)
-        visual_geometry = self.ui.widget.geometry()
-        self.ui.widget.setGeometry(
+        page_width, page_height = self._page_size(self.ui.page_visual_analysis)
+        self._stretch_layout_rows(["row_visual_analysis_actions"], page_width)
+        visual_geometry = self.ui.panel_visual_canvas.geometry()
+        self.ui.panel_visual_canvas.setGeometry(
             visual_geometry.x(),
             visual_geometry.y(),
             max(page_width - visual_geometry.x(), 320),
@@ -1373,12 +1403,12 @@ class MainWindow(QMainWindow):
     def _apply_toolbar_icons(self):
         """为顶部工具栏按钮加载图标并设置提示文本。"""
         buttons = [
-            (self.ui.pushButton, "new_scheme.png", "新建定轨方案"),
-            (self.ui.pushButton_2, "open_scheme.png", "打开定轨方案"),
-            (self.ui.pushButton_3, "save_scheme.png", "保存定轨方案"),
-            (self.ui.pushButton_4, "save_as_scheme.png", "另存为定轨方案"),
-            (self.ui.pushButton_5, "run_orbit.png", "开始定轨"),
-            (self.ui.pushButton_6, "chart.png", "查看图表"),
+            (self.ui.button_new_scheme, "new_scheme.png", "新建定轨方案"),
+            (self.ui.button_open_scheme, "open_scheme.png", "打开定轨方案"),
+            (self.ui.button_save_scheme, "save_scheme.png", "保存定轨方案"),
+            (self.ui.button_save_scheme_as, "save_as_scheme.png", "另存为定轨方案"),
+            (self.ui.button_start_orbit, "run_orbit.png", "开始定轨"),
+            (self.ui.button_show_chart, "chart.png", "查看图表"),
         ]
         for button, icon_name, tooltip in buttons:
             path = iconsource_rc.icon_path(icon_name)
@@ -1391,58 +1421,58 @@ class MainWindow(QMainWindow):
     def _connect_signals(self):
         """连接菜单、按钮、表格和任务控制相关的 Qt 信号。"""
         self.ui.tabWidget.currentChanged.connect(self._schedule_layout_refresh)
-        self.ui.tabWidget_2.currentChanged.connect(self._schedule_layout_refresh)
-        self.ui.Runmode_2.currentIndexChanged.connect(self._sync_integration_center_controls)
-        self.ui.tableWidget_2.itemChanged.connect(self._on_observation_weight_item_changed)
-        self.ui.tableWidget_6.itemChanged.connect(self._on_select_observation_item_changed)
-        self.ui.tableWidget_17.itemChanged.connect(self._on_simulation_observation_item_changed)
-        self.ui.tableWidget_16.itemChanged.connect(self._on_per_acc_item_changed)
+        self.ui.tabs_arc_parameter_details.currentChanged.connect(self._schedule_layout_refresh)
+        self.ui.combo_integration_center.currentIndexChanged.connect(self._sync_integration_center_controls)
+        self.ui.table_arc_observation_weight.itemChanged.connect(self._on_observation_weight_item_changed)
+        self.ui.table_arc_select_observation.itemChanged.connect(self._on_select_observation_item_changed)
+        self.ui.table_simulated_observations.itemChanged.connect(self._on_simulation_observation_item_changed)
+        self.ui.table_arc_per_acc_model.itemChanged.connect(self._on_per_acc_item_changed)
 
-        self.ui.pushButton.clicked.connect(self.new_scheme)
-        self.ui.pushButton_2.clicked.connect(self.open_scheme)
-        self.ui.pushButton_3.clicked.connect(self.save_scheme)
-        self.ui.pushButton_4.clicked.connect(self.save_scheme_as)
-        self.ui.pushButton_5.clicked.connect(self.start_orbit_determination)
-        self.ui.pushButton_6.clicked.connect(lambda: self.ui.tabWidget.setCurrentWidget(self.ui.tab_6))
+        self.ui.button_new_scheme.clicked.connect(self.new_scheme)
+        self.ui.button_open_scheme.clicked.connect(self.open_scheme)
+        self.ui.button_save_scheme.clicked.connect(self.save_scheme)
+        self.ui.button_save_scheme_as.clicked.connect(self.save_scheme_as)
+        self.ui.button_start_orbit.clicked.connect(self.start_orbit_determination)
+        self.ui.button_show_chart.clicked.connect(lambda: self.ui.tabWidget.setCurrentWidget(self.ui.page_visual_analysis))
 
-        self.ui.action1.triggered.connect(self.new_scheme)
-        self.ui.action1_2.triggered.connect(self.open_scheme)
-        self.ui.action2.triggered.connect(self.save_scheme)
-        self.ui.action3.triggered.connect(self.save_scheme_as)
-        self.ui.action1_3.triggered.connect(lambda: self.import_card("GCP"))
-        self.ui.action2_2.triggered.connect(lambda: self.import_card("LCP"))
-        self.ui.action3_2.triggered.connect(lambda: self.import_card("SimCP"))
-        self.ui.action4.triggered.connect(lambda: self.import_card("StaCP"))
-        self.ui.action1_4.triggered.connect(self.start_orbit_determination)
-        self.ui.actiond.triggered.connect(lambda: self.ui.tabWidget.setCurrentWidget(self.ui.tab_6))
-        self.ui.actiona.triggered.connect(self.show_about)
+        self.ui.action_new_scheme.triggered.connect(self.new_scheme)
+        self.ui.action_open_scheme.triggered.connect(self.open_scheme)
+        self.ui.action_save_scheme.triggered.connect(self.save_scheme)
+        self.ui.action_save_scheme_as.triggered.connect(self.save_scheme_as)
+        self.ui.action_import_gcp_card.triggered.connect(lambda: self.import_card("GCP"))
+        self.ui.action_import_lcp_card.triggered.connect(lambda: self.import_card("LCP"))
+        self.ui.action_import_simcp_card.triggered.connect(lambda: self.import_card("SimCP"))
+        self.ui.action_import_stacp_card.triggered.connect(lambda: self.import_card("StaCP"))
+        self.ui.action_start_orbit.triggered.connect(self.start_orbit_determination)
+        self.ui.action_show_chart.triggered.connect(lambda: self.ui.tabWidget.setCurrentWidget(self.ui.page_visual_analysis))
+        self.ui.action_show_about.triggered.connect(self.show_about)
 
-        self.ui.toolButton.clicked.connect(lambda: self.import_card("SimCP"))
-        self.ui.toolButton_2.clicked.connect(self.configure_and_generate_observations)
+        self.ui.tool_simulation_import_card.clicked.connect(lambda: self.import_card("SimCP"))
+        self.ui.tool_simulation_generate_observations.clicked.connect(self.configure_and_generate_observations)
         # 全局/弧段参数解算和小行星星历解算入口已停用，仅保留定轨过程。
-        # self.ui.toolButton_5.clicked.connect(self.start_orbit_determination)
-        # self.ui.toolButton_6.clicked.connect(self.select_ast_ephe_exe)
-        # self.ui.pushButton_79.clicked.connect(self.copy_observations_to_arc)
-        # self.ui.pushButton_80.clicked.connect(self.process_observation_files)
-        # self.ui.pushButton_81.clicked.connect(self.configure_ast_ephe_observations)
-        # self.ui.pushButton_82.clicked.connect(self.merge_ephemeris)
-        self.ui.pushButton_83.clicked.connect(self.show_orbit_plot)
-        self.ui.pushButton_86.clicked.connect(self.show_residual_plot)
-        self.ui.pushButton_85.clicked.connect(self.clear_visual_widget)
-        self.ui.pushButton_84.clicked.connect(self.stop_tasks)
+        # self.ui.tool_output_start_orbit_solution.clicked.connect(self.start_orbit_determination)
+        # self.ui.tool_output_select_ephemeris_exe.clicked.connect(self.select_ast_ephe_exe)
+        # self.ui.button_output_configure_observation_file.clicked.connect(self.copy_observations_to_arc)
+        # self.ui.button_output_process_observation_file.clicked.connect(self.process_observation_files)
+        # self.ui.button_output_configure_ephemeris_observation_file.clicked.connect(self.configure_ast_ephe_observations)
+        # self.ui.button_output_merge_ephemeris_observation_file.clicked.connect(self.merge_ephemeris)
+        self.ui.button_visual_import_orbit_file.clicked.connect(self.show_orbit_plot)
+        self.ui.button_visual_import_residual_file.clicked.connect(self.show_residual_plot)
+        self.ui.button_visual_clear.clicked.connect(self.clear_visual_widget)
+        self.ui.button_orbit_process_clear_stop.clicked.connect(self.stop_tasks)
 
     def _init_default_tables(self):
         """清空并填充各参数表格的默认行。"""
         defaults = {
-            self.ui.tableWidget_2: [["51-双程测距", "2.0D-0", "meter"], ["52-双程测速", "1.0D-0", "mm/s"]],
-            self.ui.tableWidget_4: [["51", "4.0D-0", "1.0D+15"]],
-            self.ui.tableWidget_5: [["51", "001", "001", "10.0D0", "", "", "1.0D-15"]],
-            self.ui.tableWidget_6: [["1-双程测距", "6", "6", "", "0000000", "0000000", "", ""]],
-            self.ui.tableWidget_7: [["2", "6", "6", "0000000", "0000000", "", ""]],
-            self.ui.tableWidget_8: [["1", "", "", "TDB"]],
-            self.ui.tableWidget_16: [["1", "3", "0.295304904947824E-05", "0.577322948775672E-06"]],
-            self.ui.tableWidget_17: [self._simulation_observation_default_row()],
-            self.ui.tableWidget_26: [self._station_default_row()],
+            self.ui.table_arc_observation_weight: [["51-双程测距", "2.0D-0", "meter"], ["52-双程测速", "1.0D-0", "mm/s"]],
+            self.ui.table_arc_measurement_bias: [["51", "4.0D-0", "1.0D+15"]],
+            self.ui.table_arc_fixed_measurement_bias: [["51", "001", "001", "10.0D0", "", "", "1.0D-15"]],
+            self.ui.table_arc_select_observation: [["1-双程测距", "6", "6", "", "0000000", "0000000", "", ""]],
+            self.ui.table_arc_delete_observation: [["2", "6", "6", "0000000", "0000000", "", ""]],
+            self.ui.table_arc_per_acc_period: [["1", "", "", "TDB"]],
+            self.ui.table_arc_per_acc_model: [["1", "3", "0.295304904947824E-05", "0.577322948775672E-06"]],
+            self.ui.table_simulated_observations: [self._simulation_observation_default_row()],
+            self.ui.table_station_parameters: [self._station_default_row()],
         }
         for table, rows in defaults.items():
             table.setRowCount(0)
@@ -1460,15 +1490,15 @@ class MainWindow(QMainWindow):
     def _configured_tables(self):
         """返回需要统一字体和刷新处理的业务表格列表。"""
         return [
-            self.ui.tableWidget_2,
-            self.ui.tableWidget_4,
-            self.ui.tableWidget_5,
-            self.ui.tableWidget_6,
-            self.ui.tableWidget_7,
-            self.ui.tableWidget_8,
-            self.ui.tableWidget_16,
-            self.ui.tableWidget_17,
-            self.ui.tableWidget_26,
+            self.ui.table_arc_observation_weight,
+            self.ui.table_arc_measurement_bias,
+            self.ui.table_arc_fixed_measurement_bias,
+            self.ui.table_arc_select_observation,
+            self.ui.table_arc_delete_observation,
+            self.ui.table_arc_per_acc_period,
+            self.ui.table_arc_per_acc_model,
+            self.ui.table_simulated_observations,
+            self.ui.table_station_parameters,
         ]
 
     def _apply_configured_table_fonts(self):
@@ -1478,8 +1508,8 @@ class MainWindow(QMainWindow):
 
     def _simulation_observation_default_row(self):
         """生成一行默认 SimCP 模拟观测配置，时间跟随当前弧段。"""
-        start = self.ui.dateTimeEdit.dateTime().toString("yyyy-MM-dd HH:mm:ss.zzz")
-        end = self.ui.dateTimeEdit_2.dateTime().toString("yyyy-MM-dd HH:mm:ss.zzz")
+        start = self.ui.date_arc_start_time.dateTime().toString("yyyy-MM-dd HH:mm:ss.zzz")
+        end = self.ui.date_arc_end_time.dateTime().toString("yyyy-MM-dd HH:mm:ss.zzz")
         return ["0000", "", "", "", "", start, end, "51-双程测距", "2.000d-0", "30.000"]
 
     def _station_default_row(self):
@@ -1488,30 +1518,30 @@ class MainWindow(QMainWindow):
 
     def _add_station_row(self):
         """向测站表格新增默认测站行并刷新下拉列。"""
-        TableTools.add_row(self.ui.tableWidget_26, [], self._station_default_row())
+        TableTools.add_row(self.ui.table_station_parameters, [], self._station_default_row())
         self._configure_station_table()
 
     def _setup_tables(self):
         """为所有业务表格绑定增删改按钮、时间列和默认行配置。"""
         configs = [
-            (self.ui.tableWidget_2, self.ui.pushButton_7, self.ui.pushButton_8, self.ui.pushButton_9, [], ["51-双程测距", "2.0D-0", "meter"]),
-            (self.ui.tableWidget_4, self.ui.pushButton_13, self.ui.pushButton_14, self.ui.pushButton_15, [], ["51", "4.0D-0", "1.0D+15"]),
-            (self.ui.tableWidget_5, self.ui.pushButton_16, self.ui.pushButton_18, self.ui.pushButton_17, [4, 5], ["51", "001", "001", "10.0D0", "", "", "1.0D-15"]),
-            (self.ui.tableWidget_6, self.ui.pushButton_19, self.ui.pushButton_21, self.ui.pushButton_20, [6, 7], ["1-双程测距", "6", "6", "", "0000000", "0000000", "", ""]),
-            (self.ui.tableWidget_7, self.ui.pushButton_22, self.ui.pushButton_24, self.ui.pushButton_23, [5, 6], ["2", "6", "6", "0000000", "0000000", "", ""]),
-            (self.ui.tableWidget_8, self.ui.pushButton_25, self.ui.pushButton_26, self.ui.pushButton_27, [1, 2], ["1", "", "", "TDB"]),
-            (self.ui.tableWidget_16, self.ui.pushButton_51, self.ui.pushButton_50, self.ui.pushButton_49, [], ["1", "3", "0.295304904947824E-05", "0.577322948775672E-06"]),
-            (self.ui.tableWidget_17, self.ui.pushButton_73, self.ui.pushButton_75, self.ui.pushButton_74, [5, 6], self._simulation_observation_default_row),
+            (self.ui.table_arc_observation_weight, self.ui.button_arc_observation_weight_add, self.ui.button_arc_observation_weight_edit, self.ui.button_arc_observation_weight_delete, [], ["51-双程测距", "2.0D-0", "meter"]),
+            (self.ui.table_arc_measurement_bias, self.ui.button_arc_measurement_bias_add, self.ui.button_arc_measurement_bias_edit, self.ui.button_arc_measurement_bias_delete, [], ["51", "4.0D-0", "1.0D+15"]),
+            (self.ui.table_arc_fixed_measurement_bias, self.ui.button_arc_fixed_bias_add, self.ui.button_arc_fixed_bias_edit, self.ui.button_arc_fixed_bias_delete, [4, 5], ["51", "001", "001", "10.0D0", "", "", "1.0D-15"]),
+            (self.ui.table_arc_select_observation, self.ui.button_arc_select_observation_add, self.ui.button_arc_select_observation_edit, self.ui.button_arc_select_observation_delete, [6, 7], ["1-双程测距", "6", "6", "", "0000000", "0000000", "", ""]),
+            (self.ui.table_arc_delete_observation, self.ui.button_arc_delete_observation_add, self.ui.button_arc_delete_observation_edit, self.ui.button_arc_delete_observation_delete, [5, 6], ["2", "6", "6", "0000000", "0000000", "", ""]),
+            (self.ui.table_arc_per_acc_period, self.ui.button_arc_per_acc_period_add, self.ui.button_arc_per_acc_period_edit, self.ui.button_arc_per_acc_period_delete, [1, 2], ["1", "", "", "TDB"]),
+            (self.ui.table_arc_per_acc_model, self.ui.button_arc_per_acc_model_add, self.ui.button_arc_per_acc_model_edit, self.ui.button_arc_per_acc_model_delete, [], ["1", "3", "0.295304904947824E-05", "0.577322948775672E-06"]),
+            (self.ui.table_simulated_observations, self.ui.button_simulation_observation_add, self.ui.button_simulation_observation_edit, self.ui.button_simulation_observation_delete, [5, 6], self._simulation_observation_default_row),
         ]
         for table, add_btn, edit_btn, del_btn, datetime_columns, default_row in configs:
             TableTools.setup(table, datetime_columns)
             add_btn.clicked.connect(lambda _, t=table, cols=datetime_columns, row=default_row: TableTools.add_row(t, cols, row))
             edit_btn.clicked.connect(lambda _, t=table, cols=datetime_columns: TableTools.edit_row(t, self, cols))
             del_btn.clicked.connect(lambda _, t=table: TableTools.delete_row(t, self))
-        TableTools.setup(self.ui.tableWidget_26, [])
-        self.ui.pushButton_76.clicked.connect(self._add_station_row)
-        self.ui.pushButton_77.clicked.connect(lambda: TableTools.edit_row(self.ui.tableWidget_26, self, []))
-        self.ui.pushButton_78.clicked.connect(lambda: TableTools.delete_row(self.ui.tableWidget_26, self))
+        TableTools.setup(self.ui.table_station_parameters, [])
+        self.ui.button_station_add.clicked.connect(self._add_station_row)
+        self.ui.button_station_edit.clicked.connect(lambda: TableTools.edit_row(self.ui.table_station_parameters, self, []))
+        self.ui.button_station_delete.clicked.connect(lambda: TableTools.delete_row(self.ui.table_station_parameters, self))
         self._configure_observation_weight_table()
         self._configure_observation_bias_table()
         self._configure_select_observation_table()
@@ -1521,7 +1551,7 @@ class MainWindow(QMainWindow):
 
     def _configure_per_acc_table(self):
         """配置经验加速度表头，并同步方向和模型的中文显示。"""
-        table = self.ui.tableWidget_16
+        table = self.ui.table_arc_per_acc_model
         headers = ("方向", "模型", "数值", "先验误差")
         table.setColumnCount(len(headers))
         for col, text in enumerate(headers):
@@ -1535,7 +1565,7 @@ class MainWindow(QMainWindow):
 
     def _configure_station_table(self):
         """配置测站参数表头和状态、坐标类型、所在天体下拉列。"""
-        table = self.ui.tableWidget_26
+        table = self.ui.table_station_parameters
         headers = (
             "测站编号",
             "测站简称",
@@ -1566,7 +1596,7 @@ class MainWindow(QMainWindow):
 
     def _fit_station_columns(self):
         """按可用宽度自适应测站参数表的 13 个列宽。"""
-        table = self.ui.tableWidget_26
+        table = self.ui.table_station_parameters
         if table.columnCount() < 13:
             return
         header = table.horizontalHeader()
@@ -1632,7 +1662,7 @@ class MainWindow(QMainWindow):
 
     def _configure_select_observation_table(self):
         """配置选择观测值表头，并把观测类型同步为中文标签。"""
-        table = self.ui.tableWidget_6
+        table = self.ui.table_arc_select_observation
         headers = ("观测值类型", "上行位", "下行位", "Passnumber", "卫星1编号", "卫星2编号", "起始时刻", "结束时刻")
         table.setColumnCount(len(headers))
         for col, text in enumerate(headers):
@@ -1650,7 +1680,7 @@ class MainWindow(QMainWindow):
 
     def _fit_select_observation_columns(self):
         """按可用宽度自适应选择观测值表各列宽度。"""
-        table = self.ui.tableWidget_6
+        table = self.ui.table_arc_select_observation
         if table.columnCount() < 8:
             return
         header = table.horizontalHeader()
@@ -1674,14 +1704,14 @@ class MainWindow(QMainWindow):
 
     def _configure_simulation_observation_table(self):
         """刷新模拟观测值表的观测类型中文标签和字体。"""
-        table = self.ui.tableWidget_17
+        table = self.ui.table_simulated_observations
         for row in range(table.rowCount()):
             self._sync_simulation_observation_row(row)
         TableTools.apply_font(table)
 
     def _configure_observation_bias_table(self):
         """配置测量偏差固定表表头和列宽策略。"""
-        table = self.ui.tableWidget_5
+        table = self.ui.table_arc_fixed_measurement_bias
         headers = ("观测值类型", "下行位", "上行位", "偏差初值", "起始时刻", "结束时刻", "先验误差")
         table.setColumnCount(len(headers))
         for col, text in enumerate(headers):
@@ -1696,7 +1726,7 @@ class MainWindow(QMainWindow):
 
     def _fit_observation_bias_columns(self):
         """按可用宽度自适应测量偏差固定表各列宽度。"""
-        table = self.ui.tableWidget_5
+        table = self.ui.table_arc_fixed_measurement_bias
         if table.columnCount() < 7:
             return
         header = table.horizontalHeader()
@@ -1720,7 +1750,7 @@ class MainWindow(QMainWindow):
 
     def _configure_observation_weight_table(self):
         """配置观测值权重表，并同步观测类型中文标签和单位。"""
-        table = self.ui.tableWidget_2
+        table = self.ui.table_arc_observation_weight
         for col, text in enumerate(("观测值类型", "观测值权重", "观测值单位")):
             item = table.horizontalHeaderItem(col) or QTableWidgetItem()
             item.setText(text)
@@ -1797,7 +1827,7 @@ class MainWindow(QMainWindow):
         """同步观测权重表单行的观测类型标签和单位列。"""
         if row < 0 or self._syncing_observation_weight:
             return
-        table = self.ui.tableWidget_2
+        table = self.ui.table_arc_observation_weight
         if row >= table.rowCount():
             return
         code = self._observation_type_code(self._table_text(table, row, 0))
@@ -1826,7 +1856,7 @@ class MainWindow(QMainWindow):
         """同步模拟观测值表单行的观测类型中文标签。"""
         if row < 0 or self._syncing_simulation_observation:
             return
-        table = self.ui.tableWidget_17
+        table = self.ui.table_simulated_observations
         if row >= table.rowCount() or table.columnCount() <= 7:
             return
         code = self._observation_type_code(self._table_text(table, row, 7))
@@ -1847,7 +1877,7 @@ class MainWindow(QMainWindow):
         """同步经验加速度表单行的方向和模型中文标签。"""
         if row < 0 or self._syncing_per_acc:
             return
-        table = self.ui.tableWidget_16
+        table = self.ui.table_arc_per_acc_model
         if row >= table.rowCount():
             return
         updates = (
@@ -1870,14 +1900,14 @@ class MainWindow(QMainWindow):
 
     def _on_observation_weight_item_changed(self, item):
         """处理观测权重表单元格修改，触发类型和单位同步。"""
-        if item and item.tableWidget() is self.ui.tableWidget_2 and item.column() in (0, 2):
+        if item and item.tableWidget() is self.ui.table_arc_observation_weight and item.column() in (0, 2):
             self._sync_observation_weight_row(item.row())
 
     def _on_select_observation_item_changed(self, item):
         """处理选择观测值表类型列修改，自动补全中文说明。"""
         if (
             not item
-            or item.tableWidget() is not self.ui.tableWidget_6
+            or item.tableWidget() is not self.ui.table_arc_select_observation
             or item.column() != 0
             or self._syncing_select_observation
         ):
@@ -1896,12 +1926,12 @@ class MainWindow(QMainWindow):
 
     def _on_simulation_observation_item_changed(self, item):
         """处理模拟观测值表类型列修改，自动补全中文说明。"""
-        if item and item.tableWidget() is self.ui.tableWidget_17 and item.column() == 7:
+        if item and item.tableWidget() is self.ui.table_simulated_observations and item.column() == 7:
             self._sync_simulation_observation_row(item.row())
 
     def _on_per_acc_item_changed(self, item):
         """处理经验加速度表方向/模型列修改，自动补全中文说明。"""
-        if item and item.tableWidget() is self.ui.tableWidget_16 and item.column() in (0, 1):
+        if item and item.tableWidget() is self.ui.table_arc_per_acc_model and item.column() in (0, 1):
             self._sync_per_acc_row(item.row())
 
     def new_scheme(self):
@@ -1916,7 +1946,7 @@ class MainWindow(QMainWindow):
         self._configure_per_acc_table()
         self._apply_configured_table_fonts()
         self.current_scheme_dir = DEFAULT_SCHEME_DIR
-        self.ui.textEdit.clear()
+        self.ui.text_orbit_process_log.clear()
         self._log("已新建默认定轨方案。")
 
     def open_scheme(self):
@@ -2004,7 +2034,7 @@ class MainWindow(QMainWindow):
     def show_observation_weight_help(self):
         """根据当前观测权重表生成观测类型、单位和权重说明弹窗。"""
         lines = []
-        table = self.ui.tableWidget_2
+        table = self.ui.table_arc_observation_weight
         for row in range(table.rowCount()):
             obs_type = self._observation_type_code(self._table_text(table, row, 0))
             weight = self._table_text(table, row, 1)
@@ -2040,7 +2070,7 @@ class MainWindow(QMainWindow):
     def copy_observations_to_arc(self):
         """保存方案后把生成的观测文件复制到界面指定的弧段目录。"""
         self._write_cards(self.current_scheme_dir)
-        result = self._copy_obs_files_to_arc(self.ui.lineEdit_87.text().strip())
+        result = self._copy_obs_files_to_arc(self.ui.edit_output_observation_station_id.text().strip())
         self._log(result)
 
     @staticmethod
@@ -2098,8 +2128,8 @@ class MainWindow(QMainWindow):
             )
             return
 
-        self.ui.tabWidget.setCurrentWidget(self.ui.tab_5)
-        self.ui.textEdit.clear()
+        self.ui.tabWidget.setCurrentWidget(self.ui.page_orbit_output)
+        self.ui.text_orbit_process_log.clear()
         self._log(f"准备启动外部定轨程序：{ORBIT_PROGRAM}")
 
         self._orbit_stdout_decoder = codecs.getincrementaldecoder(ORBIT_OUTPUT_ENCODING)(errors="replace")
@@ -2116,8 +2146,8 @@ class MainWindow(QMainWindow):
         process.errorOccurred.connect(self._on_orbit_process_error)
         process.finished.connect(self._on_orbit_process_finished)
         self.orbit_process = process
-        self.ui.pushButton_5.setEnabled(False)
-        self.ui.action1_4.setEnabled(False)
+        self.ui.button_start_orbit.setEnabled(False)
+        self.ui.action_start_orbit.setEnabled(False)
         process.start()
 
     def _on_orbit_process_started(self):
@@ -2145,8 +2175,8 @@ class MainWindow(QMainWindow):
         if error == QProcess.FailedToStart:
             detail = self.orbit_process.errorString() if self.orbit_process else "未知错误"
             self._log(f"定轨程序启动失败：{detail}")
-            self.ui.pushButton_5.setEnabled(True)
-            self.ui.action1_4.setEnabled(True)
+            self.ui.button_start_orbit.setEnabled(True)
+            self.ui.action_start_orbit.setEnabled(True)
             if self.orbit_process:
                 self.orbit_process.deleteLater()
             self.orbit_process = None
@@ -2166,8 +2196,8 @@ class MainWindow(QMainWindow):
             self._log(f"外部定轨程序已结束，退出代码：{exit_code}")
         else:
             self._log("外部定轨程序异常终止。")
-        self.ui.pushButton_5.setEnabled(True)
-        self.ui.action1_4.setEnabled(True)
+        self.ui.button_start_orbit.setEnabled(True)
+        self.ui.action_start_orbit.setEnabled(True)
         if self.orbit_process:
             self.orbit_process.deleteLater()
         self.orbit_process = None
@@ -2237,11 +2267,11 @@ class MainWindow(QMainWindow):
             from Chart import OrbitPlotCanvas
 
             self.clear_visual_widget()
-            canvas = OrbitPlotCanvas(file_path, parent=self.ui.widget)
+            canvas = OrbitPlotCanvas(file_path, parent=self.ui.panel_visual_canvas)
             layout = self._visual_layout()
             layout.addWidget(canvas)
             canvas.start_animation()
-            self.ui.tabWidget.setCurrentWidget(self.ui.tab_6)
+            self.ui.tabWidget.setCurrentWidget(self.ui.page_visual_analysis)
         except Exception as exc:
             QMessageBox.critical(self, "绘图失败", str(exc))
 
@@ -2251,14 +2281,14 @@ class MainWindow(QMainWindow):
             from Residual import show_residual_in_widget2
 
             self.clear_visual_widget()
-            show_residual_in_widget2(self, self.ui.widget)
-            self.ui.tabWidget.setCurrentWidget(self.ui.tab_6)
+            show_residual_in_widget2(self, self.ui.panel_visual_canvas)
+            self.ui.tabWidget.setCurrentWidget(self.ui.page_visual_analysis)
         except Exception as exc:
             QMessageBox.critical(self, "残差分析失败", str(exc))
 
     def clear_visual_widget(self):
         """清空图表页容器中已有的画布或其他子控件。"""
-        layout = self.ui.widget.layout()
+        layout = self.ui.panel_visual_canvas.layout()
         if layout:
             while layout.count():
                 item = layout.takeAt(0)
@@ -2268,9 +2298,9 @@ class MainWindow(QMainWindow):
 
     def _visual_layout(self):
         """获取或创建图表页容器的垂直布局。"""
-        layout = self.ui.widget.layout()
+        layout = self.ui.panel_visual_canvas.layout()
         if layout is None:
-            layout = QVBoxLayout(self.ui.widget)
+            layout = QVBoxLayout(self.ui.panel_visual_canvas)
             layout.setContentsMargins(0, 0, 0, 0)
         return layout
 
@@ -2296,7 +2326,7 @@ class MainWindow(QMainWindow):
         if process_stopped:
             self._log("已停止外部定轨程序。")
         else:
-            self.ui.textEdit.clear()
+            self.ui.text_orbit_process_log.clear()
             self.ui.statusbar.showMessage("定轨输出已清空。")
 
     def _run_usefortran(self, start_message: str, func):
@@ -2305,7 +2335,7 @@ class MainWindow(QMainWindow):
 
     def _run_task(self, start_message: str, func):
         """创建 QThread 和 Worker 执行耗时任务，并把结果写入日志。"""
-        self.ui.tabWidget.setCurrentWidget(self.ui.tab_5)
+        self.ui.tabWidget.setCurrentWidget(self.ui.page_orbit_output)
         self._log(start_message)
         thread = QThread(self)
         worker = Worker(func)
@@ -2336,11 +2366,11 @@ class MainWindow(QMainWindow):
     def _setup_datetime_cells(self):
         """确保所有配置为时间列的表格单元格都使用 QDateTimeEdit 控件。"""
         for table, columns in [
-            (self.ui.tableWidget_5, [4, 5]),
-            (self.ui.tableWidget_6, [6, 7]),
-            (self.ui.tableWidget_7, [5, 6]),
-            (self.ui.tableWidget_8, [1, 2]),
-            (self.ui.tableWidget_17, [5, 6]),
+            (self.ui.table_arc_fixed_measurement_bias, [4, 5]),
+            (self.ui.table_arc_select_observation, [6, 7]),
+            (self.ui.table_arc_delete_observation, [5, 6]),
+            (self.ui.table_arc_per_acc_period, [1, 2]),
+            (self.ui.table_simulated_observations, [5, 6]),
         ]:
             for row in range(table.rowCount()):
                 for col in columns:
@@ -2352,7 +2382,7 @@ class MainWindow(QMainWindow):
 
     def _log(self, message: str):
         """向日志窗口和状态栏写入一条消息。"""
-        if self.ui.textEdit.toPlainText() and not self.ui.textEdit.toPlainText().endswith("\n"):
+        if self.ui.text_orbit_process_log.toPlainText() and not self.ui.text_orbit_process_log.toPlainText().endswith("\n"):
             self._append_log_text("\n")
         self._append_log_text(f"{message.rstrip()}\n" if message else "")
         self.ui.statusbar.showMessage(message.splitlines()[0] if message else "")
@@ -2361,11 +2391,11 @@ class MainWindow(QMainWindow):
         """把文本追加到日志窗口末尾并滚动到最新位置。"""
         if not text:
             return
-        cursor = self.ui.textEdit.textCursor()
+        cursor = self.ui.text_orbit_process_log.textCursor()
         cursor.movePosition(QTextCursor.End)
         cursor.insertText(text)
-        self.ui.textEdit.setTextCursor(cursor)
-        self.ui.textEdit.ensureCursorVisible()
+        self.ui.text_orbit_process_log.setTextCursor(cursor)
+        self.ui.text_orbit_process_log.ensureCursorVisible()
 
     def show_about(self):
         """显示软件版本说明、功能范围和近期兼容性修复。"""

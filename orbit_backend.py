@@ -27,18 +27,18 @@ def run_direct_orbit_determination(ui, scheme_dir: Path, output_dir: Path) -> Or
     """根据界面参数执行内置二体动力学轨道预报或带观测的初轨修正。"""
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    start_dt = ui.dateTimeEdit.dateTime()
-    end_dt = ui.dateTimeEdit_2.dateTime()
+    start_dt = ui.date_arc_start_time.dateTime()
+    end_dt = ui.date_arc_end_time.dateTime()
     duration = start_dt.secsTo(end_dt)
     if duration <= 0:
         raise ValueError("弧段结束时刻必须晚于初始时刻。")
 
     state0 = np.concatenate([
-        _parse_vector(ui.lineEdit_32.text(), 3, "卫星初轨位置 X,Y,Z"),
-        _parse_vector(ui.lineEdit_33.text(), 3, "卫星初轨速度 Vx,Vy,Vz"),
+        _parse_vector(ui.edit_arc_initial_position.text(), 3, "卫星初轨位置 X,Y,Z"),
+        _parse_vector(ui.edit_arc_initial_velocity.text(), 3, "卫星初轨速度 Vx,Vy,Vz"),
     ])
     mu = _central_mu(ui)
-    step = max(_parse_float(ui.lineEdit_39.text(), 60.0), 1.0)
+    step = max(_parse_float(ui.edit_arc_output_step_legacy.text(), 60.0), 1.0)
 
     observation_file = _find_observation_file(scheme_dir)
     observations = _read_position_observations(observation_file, start_dt) if observation_file else []
@@ -154,15 +154,15 @@ def _parse_float(text: str, default: Optional[float] = None) -> Optional[float]:
 
 def _central_mu(ui) -> float:
     """根据当前积分中心选择界面中的中心体引力常数 GM。"""
-    text = ui.Runmode_2.currentText()
+    text = ui.combo_integration_center.currentText()
     if text == "地球":
-        return _parse_float(ui.lineEdit_5.text(), 3.986004415e14)
+        return _parse_float(ui.edit_earth_gm.text(), 3.986004415e14)
     if text == "太阳":
-        return _parse_float(ui.lineEdit_21.text(), 1.32712440018e20)
+        return _parse_float(ui.edit_sun_gm.text(), 1.32712440018e20)
     if text == "月球":
-        return _parse_float(ui.lineEdit_19.text(), 4.902801076e12)
+        return _parse_float(ui.edit_moon_gm.text(), 4.902801076e12)
     # 新界面暂未给阿波菲斯 GM 独立输入框；用全局参数中的太阳 GM 兜底，保证可直接计算。
-    return _parse_float(ui.lineEdit_21.text(), 1.32712440018e20)
+    return _parse_float(ui.edit_sun_gm.text(), 1.32712440018e20)
 
 
 def _find_observation_file(scheme_dir: Path) -> Optional[Path]:
